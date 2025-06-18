@@ -19,6 +19,35 @@ export default function App() {
   
   const [showTextureUpload, setShowTextureUpload] = useState(false);
   const [detailBook, setDetailBook] = useState<string | null>(null);
+
+  // スワイプによる表示モード切り替え
+  useEffect(() => {
+    const handleSwipeMode = (event: CustomEvent<{ direction: string }>) => {
+      const modes: Array<'stack' | 'grid' | 'shelf'> = ['stack', 'grid', 'shelf'];
+      const currentIndex = modes.indexOf(viewMode);
+      
+      if (event.detail.direction === 'left') {
+        const nextIndex = (currentIndex + 1) % modes.length;
+        setViewMode(modes[nextIndex]);
+      } else if (event.detail.direction === 'right') {
+        const prevIndex = (currentIndex - 1 + modes.length) % modes.length;
+        setViewMode(modes[prevIndex]);
+      }
+    };
+
+    const handleResetView = () => {
+      // ビューをリセット（元の位置に戻す）
+      window.location.reload();
+    };
+
+    window.addEventListener('swipe-mode', handleSwipeMode as EventListener);
+    window.addEventListener('reset-view', handleResetView);
+
+    return () => {
+      window.removeEventListener('swipe-mode', handleSwipeMode as EventListener);
+      window.removeEventListener('reset-view', handleResetView);
+    };
+  }, [viewMode, setViewMode]);
   
   useControls({
     viewMode: {
