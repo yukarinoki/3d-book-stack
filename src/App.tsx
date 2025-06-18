@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Leva, useControls } from 'leva';
-import { Layout, Scene3D, Book3D, Floor, BookDetail, SelectionControls } from '@/components';
+import { Leva, useControls, button } from 'leva';
+import { Layout, Scene3D, Book3D, Floor, BookTextureUpload, BookDetail, SelectionControls } from '@/components';
 import { useBookStore } from '@/stores';
 import { positionBooksForMode } from '@/utils';
 import './App.css';
@@ -12,9 +12,12 @@ export default function App() {
     physicsEnabled, 
     setPhysicsEnabled,
     setViewMode,
-    initializeBooks
+    initializeBooks,
+    selectedBookIds,
+    clearSelection
   } = useBookStore();
   
+  const [showTextureUpload, setShowTextureUpload] = useState(false);
   const [detailBook, setDetailBook] = useState<string | null>(null);
   
   useControls({
@@ -32,7 +35,17 @@ export default function App() {
       label: '物理演算を有効にする', 
       value: physicsEnabled,
       onChange: setPhysicsEnabled
-    }
+    },
+    '画像機能': button(() => {}),
+    uploadTexture: button(() => {
+      if (selectedBookIds.length === 1) {
+        setShowTextureUpload(true);
+      } else if (selectedBookIds.length === 0) {
+        alert('本を選択してください');
+      } else {
+        alert('1冊のみ選択してください');
+      }
+    })
   });
 
   // 表示モードに応じて本の位置を計算
@@ -47,7 +60,13 @@ export default function App() {
     }
   }, [books.length, initializeBooks]);
 
-  const selectedBook = detailBook ? books.find(b => b.id === detailBook) : null;
+  // 選択された本を取得（テクスチャアップロード用）
+  const selectedBookForTexture = selectedBookIds.length === 1 
+    ? books.find(book => book.id === selectedBookIds[0])
+    : null;
+  
+  // 詳細表示用の本を取得
+  const selectedBookForDetail = detailBook ? books.find(b => b.id === detailBook) : null;
 
   return (
     <>
@@ -67,9 +86,20 @@ export default function App() {
           </Scene3D>
         </div>
       </Layout>
+      
+      {showTextureUpload && selectedBookForTexture && (
+        <BookTextureUpload
+          book={selectedBookForTexture}
+          onClose={() => {
+            setShowTextureUpload(false);
+            clearSelection();
+          }}
+        />
+      )}
+      
       <SelectionControls />
       <BookDetail 
-        book={selectedBook || null} 
+        book={selectedBookForDetail || null} 
         onClose={() => setDetailBook(null)} 
       />
     </>

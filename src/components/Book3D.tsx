@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { Mesh, Vector3 } from 'three';
+import { useRef, useState, useMemo } from 'react';
+import { Mesh, Vector3, TextureLoader, SRGBColorSpace } from 'three';
 import { RigidBody } from '@react-three/rapier';
 import { useDrag } from '@use-gesture/react';
 import { useThree } from '@react-three/fiber';
@@ -20,13 +20,27 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
   const { camera } = useThree();
   const { updateBook, selectedBookIds, selectBook, toggleBookSelection } = useBookStore();
   
-  const { dimensions, position, rotation, color } = book;
+  const { dimensions, position, rotation, color, textureUrl } = book;
   const isSelected = selectedBookIds.includes(book.id);
   
   // Convert millimeters to meters for physics
   const width = dimensions.width / 1000;
   const height = dimensions.height / 1000;
   const depth = dimensions.depth / 1000;
+  
+  // テクスチャを読み込む（textureUrlがある場合のみ）
+  const texture = useMemo(() => {
+    if (!textureUrl) return null;
+    try {
+      const loader = new TextureLoader();
+      const loadedTexture = loader.load(textureUrl);
+      loadedTexture.colorSpace = SRGBColorSpace;
+      return loadedTexture;
+    } catch (error) {
+      console.error('Failed to load texture:', error);
+      return null;
+    }
+  }, [textureUrl]);
   
   // ドラッグ機能の実装
   const bind = useDrag(({ active, movement: [x, y] }) => {
@@ -53,7 +67,14 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
     <boxGeometry args={[width, height, depth]} />
   );
   
-  const bookMaterial = (
+  // テクスチャがある場合とない場合でマテリアルを切り替え
+  const bookMaterial = texture ? (
+    <meshStandardMaterial 
+      map={texture}
+      roughness={0.8}
+      metalness={0.1}
+    />
+  ) : (
     <meshStandardMaterial 
       color={isSelected ? '#FFD700' : (isHovered ? '#A0522D' : (color || '#8B4513'))} 
       roughness={0.8}
@@ -91,6 +112,13 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
       >
         {bookGeometry}
         {bookMaterial}
+        {/* 選択状態を示すアウトライン */}
+        {isSelected && (
+          <mesh scale={[1.05, 1.05, 1.05]}>
+            <boxGeometry args={[width, height, depth]} />
+            <meshBasicMaterial color="#4ECDC4" wireframe />
+          </mesh>
+        )}
       </mesh>
       {isHovered && !isDragging && (
         <Html position={position} center>
@@ -135,6 +163,13 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
         >
           {bookGeometry}
           {bookMaterial}
+          {/* 選択状態を示すアウトライン */}
+          {isSelected && (
+            <mesh scale={[1.05, 1.05, 1.05]}>
+              <boxGeometry args={[width, height, depth]} />
+              <meshBasicMaterial color="#4ECDC4" wireframe />
+            </mesh>
+          )}
         </mesh>
         {isHovered && (
           <Html position={position} center>
