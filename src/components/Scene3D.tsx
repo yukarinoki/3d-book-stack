@@ -14,8 +14,8 @@ export const Scene3D = ({ children, physicsEnabled = true }: Scene3DProps) => {
     <div className="w-full h-full">
       <Canvas
         camera={{
-          position: [2, 1.5, 2], // 斜め上から見下ろす位置（水平な本がよく見える）
-          fov: 35, // 視野角を調整して適切な拡大率を得る
+          position: [3, 0.1, 2], // 斜め上から見下ろす位置（水平な本がよく見える）
+          fov: 25, // 視野角を調整して適切な拡大率を得る
         }}
         shadows
       >
