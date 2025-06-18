@@ -14,6 +14,7 @@ export interface Book {
   bookType: BookType;
   color?: string;
   textureUrl?: string;
+  coverImageData?: string;
   position?: [number, number, number];
   rotation?: [number, number, number];
 }
