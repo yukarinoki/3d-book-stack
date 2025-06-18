@@ -68,29 +68,6 @@ export const createMockBooks = (): Book[] => {
     },
   ];
 
-  // 本を適切にスタックするように位置を計算
-  let currentHeight = 0;
-  const stackSpacing = 0.05; // 本と本の間の隙間（50mm）
-
-  return books.map((book) => {
-    // 水平配置時の本の高さは厚み（depth）になる（物理エンジン用にメートルに変換）
-    const bookHeight = book.dimensions.depth / 1000;
-
-    // 現在の本の中心位置（床から本の中心までの高さ）
-    const yPosition = currentHeight + bookHeight / 2;
-
-    // 次の本のために高さを更新
-    currentHeight += bookHeight + stackSpacing;
-
-    // 水平方向のランダム性を追加（X軸とZ軸）
-    const randomOffsetRange = 0.05; // 5cmの範囲内でランダム
-    const randomX = (Math.random() - 0.5) * randomOffsetRange;
-    const randomZ = (Math.random() - 0.5) * randomOffsetRange;
-
-    return {
-      ...book,
-      position: [randomX, yPosition, randomZ] as [number, number, number],
-      rotation: [-Math.PI / 2, 0, 0] as [number, number, number], // X軸で-90度回転（表紙が上向き）
-    };
-  });
+  // 位置と回転は配置システムで管理するため、基本データのみ返す
+  return books;
 };
