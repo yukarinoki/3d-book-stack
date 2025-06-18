@@ -6,6 +6,15 @@ interface ImageUploadProps {
   onUploadComplete?: (imageUrl: string) => void;
 }
 
+// デモ用のサンプル画像URL（publicディレクトリ内の画像）
+const SAMPLE_IMAGES = [
+  '/test_images/book_cover_1.jpg',
+  '/test_images/book_cover_2.jpg',
+  '/test_images/book_cover_3.jpg',
+  '/test_images/book_cover_4.jpg',
+  '/test_images/book_cover_5.jpg',
+];
+
 export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
@@ -65,6 +74,13 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
     }
   };
 
+  // サンプル画像を選択
+  const handleSampleImageSelect = (imageUrl: string) => {
+    setPreview(imageUrl);
+    updateBook(bookId, { textureUrl: imageUrl });
+    onUploadComplete?.(imageUrl);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col items-center">
@@ -101,6 +117,33 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
           className="hidden"
         />
       </div>
+      
+      {/* 開発環境でのみサンプル画像を表示 */}
+      {import.meta.env.DEV && (
+        <div className="border-t pt-4">
+          <p className="text-sm font-semibold text-gray-700 mb-2">サンプル画像（開発用）:</p>
+          <div className="grid grid-cols-5 gap-2">
+            {SAMPLE_IMAGES.map((imageUrl, index) => (
+              <button
+                key={imageUrl}
+                onClick={() => handleSampleImageSelect(imageUrl)}
+                className="relative group"
+                title={`サンプル画像 ${index + 1}`}
+              >
+                <img 
+                  src={imageUrl} 
+                  alt={`サンプル ${index + 1}`}
+                  className="w-full h-20 object-cover rounded border-2 border-transparent group-hover:border-blue-500 transition-colors"
+                  onError={(e) => {
+                    // 画像が見つからない場合はプレースホルダーを表示
+                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/150x200?text=Sample+${index + 1}`;
+                  }}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       
       <p className="text-sm text-gray-600 text-center">
         JPG、PNG、GIF形式の画像をアップロードできます
