@@ -7,3 +7,4 @@ export { ImageEditor } from './ImageEditor';
 export { BookTextureUpload } from './BookTextureUpload';
 export { BookDetail } from './BookDetail';
 export { SelectionControls } from './SelectionControls';
+export { PWAInstallButton } from './PWAInstallButton';

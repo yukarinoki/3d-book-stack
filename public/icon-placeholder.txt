@@ -1,0 +1,10 @@
+このファイルはプレースホルダーです。
+
+実際のPWAアイコンを生成するには：
+1. public/generate-icons.html をブラウザで開く
+2. 各サイズのアイコンをダウンロード
+3. 以下のファイル名で保存：
+   - icon-192.png
+   - icon-512.png
+   - icon-maskable-192.png
+   - icon-maskable-512.png

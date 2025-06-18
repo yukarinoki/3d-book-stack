@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>アイコン生成ツール</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .icon-preview {
+      display: inline-block;
+      margin: 10px;
+      text-align: center;
+    }
+    canvas {
+      border: 1px solid #ddd;
+      display: block;
+      margin: 0 auto 10px;
+    }
+    button {
+      background: #4169E1;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #6495ED;
+    }
+    .instructions {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>3D Book Stack アイコン生成ツール</h1>
+    
+    <div id="icon-container"></div>
+    
+    <div class="instructions">
+      <h3>使い方：</h3>
+      <ol>
+        <li>下のボタンをクリックして各サイズのアイコンを生成</li>
+        <li>生成されたアイコンを右クリックして「画像として保存」</li>
+        <li>適切なファイル名で保存（例：icon-192.png）</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+      <!-- 背景 -->
+      <rect width="512" height="512" fill="#1e293b" rx="64"/>
+      
+      <!-- 本のスタック -->
+      <!-- 一番下の本 -->
+      <g transform="translate(256, 256)">
+        <rect x="-120" y="40" width="240" height="40" fill="#8B4513" rx="4"/>
+        <rect x="-115" y="35" width="230" height="40" fill="#A0522D" rx="4"/>
+        <text x="0" y="62" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="20" font-weight="bold">BOOK 1</text>
+      </g>
+      
+      <!-- 真ん中の本 -->
+      <g transform="translate(256, 256)">
+        <rect x="-110" y="-10" width="220" height="40" fill="#DC143C" rx="4" transform="rotate(-5)"/>
+        <rect x="-105" y="-15" width="210" height="40" fill="#FF6347" rx="4" transform="rotate(-5)"/>
+        <text x="0" y="12" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="20" font-weight="bold" transform="rotate(-5)">BOOK 2</text>
+      </g>
+      
+      <!-- 一番上の本 -->
+      <g transform="translate(256, 256)">
+        <rect x="-100" y="-60" width="200" height="40" fill="#4169E1" rx="4" transform="rotate(8)"/>
+        <rect x="-95" y="-65" width="190" height="40" fill="#6495ED" rx="4" transform="rotate(8)"/>
+        <text x="0" y="-38" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="20" font-weight="bold" transform="rotate(8)">BOOK 3</text>
+      </g>
+      
+      <!-- 3Dエフェクト用の影 -->
+      <ellipse cx="256" cy="340" rx="140" ry="20" fill="#000000" opacity="0.3"/>
+    </svg>`;
+
+    const sizes = [
+      { size: 192, name: 'icon-192.png' },
+      { size: 512, name: 'icon-512.png' },
+      { size: 192, name: 'icon-maskable-192.png', maskable: true },
+      { size: 512, name: 'icon-maskable-512.png', maskable: true }
+    ];
+
+    const container = document.getElementById('icon-container');
+
+    sizes.forEach(({ size, name, maskable }) => {
+      const div = document.createElement('div');
+      div.className = 'icon-preview';
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      
+      const ctx = canvas.getContext('2d');
+      
+      const img = new Image();
+      img.onload = () => {
+        if (maskable) {
+          // マスカブルアイコンは余白を追加
+          const padding = size * 0.1;
+          ctx.drawImage(img, padding, padding, size - padding * 2, size - padding * 2);
+        } else {
+          ctx.drawImage(img, 0, 0, size, size);
+        }
+      };
+      img.src = 'data:image/svg+xml;base64,' + btoa(iconSvg);
+      
+      const label = document.createElement('div');
+      label.textContent = name;
+      
+      const downloadBtn = document.createElement('button');
+      downloadBtn.textContent = 'ダウンロード';
+      downloadBtn.onclick = () => {
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = name;
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+      };
+      
+      div.appendChild(canvas);
+      div.appendChild(label);
+      div.appendChild(downloadBtn);
+      container.appendChild(div);
+    });
+  </script>
+</body>
+</html>

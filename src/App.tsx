@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Leva, useControls, button } from 'leva';
-import { Layout, Scene3D, Book3D, Floor, BookTextureUpload, BookDetail, SelectionControls } from '@/components';
+import { Layout, Scene3D, Book3D, Floor, BookTextureUpload, BookDetail, SelectionControls, PWAInstallButton } from '@/components';
 import { useBookStore } from '@/stores';
 import { positionBooksForMode } from '@/utils';
+import * as serviceWorkerRegistration from '@/utils/pwa/serviceWorkerRegistration';
 import './App.css';
 
 export default function App() {
@@ -82,11 +83,21 @@ export default function App() {
     return positionBooksForMode(books, viewMode);
   }, [books, viewMode]);
 
-  // 初回マウント時に本を初期化
+  // 初回マウント時に本を初期化とService Worker登録
   useEffect(() => {
     if (books.length === 0) {
       initializeBooks();
     }
+
+    // Service Workerの登録
+    serviceWorkerRegistration.register({
+      onSuccess: () => {
+        console.log('アプリがオフラインで使用できるようになりました！');
+      },
+      onUpdate: () => {
+        console.log('新しいバージョンが利用可能です。再読み込みしてください。');
+      },
+    });
   }, [books.length, initializeBooks]);
 
   // 選択された本を取得（テクスチャアップロード用）
@@ -115,6 +126,8 @@ export default function App() {
           </Scene3D>
         </div>
       </Layout>
+      
+      <PWAInstallButton />
       
       {showTextureUpload && selectedBookForTexture && (
         <BookTextureUpload
