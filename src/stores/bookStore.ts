@@ -14,6 +14,7 @@ export interface BookStackState {
   selectedBookIds: string[];
   viewMode: 'stack' | 'shelf' | 'grid';
   physicsEnabled: boolean;
+  hoveredBookId: string | null;
 }
 
 export interface BookStackActions {
@@ -29,6 +30,9 @@ export interface BookStackActions {
   toggleBookSelection: (id: string) => void;
   clearSelection: () => void;
   selectMultiple: (ids: string[]) => void;
+  
+  // ホバー状態の管理
+  setHoveredBook: (id: string | null) => void;
   
   // 表示モードの管理
   setViewMode: (mode: BookStackState['viewMode']) => void;
@@ -52,6 +56,7 @@ const initialState: BookStackState = {
   selectedBookIds: [],
   viewMode: 'stack',
   physicsEnabled: true,
+  hoveredBookId: null,
 };
 
 export const useBookStore = create<BookStore>()(
@@ -163,6 +168,11 @@ export const useBookStore = create<BookStore>()(
         
         selectMultiple: (ids) => {
           set({ selectedBookIds: ids }, false, 'selectMultiple');
+        },
+        
+        // ホバー状態の管理
+        setHoveredBook: (id) => {
+          set({ hoveredBookId: id }, false, 'setHoveredBook');
         },
         
         // 表示モードの管理

@@ -16,12 +16,12 @@ interface Book3DProps {
 export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DProps) => {
   const meshRef = useRef<Mesh>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const { camera } = useThree();
-  const { updateBook, selectedBookIds, selectBook, toggleBookSelection } = useBookStore();
+  const { updateBook, selectedBookIds, selectBook, toggleBookSelection, hoveredBookId, setHoveredBook } = useBookStore();
   
   const { dimensions, position, rotation, color, textureUrl } = book;
   const isSelected = selectedBookIds.includes(book.id);
+  const isHovered = hoveredBookId === book.id;
   
   // Convert millimeters to meters for physics
   const width = dimensions.width / 1000;
@@ -92,8 +92,16 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
         rotation={rotation}
         castShadow
         receiveShadow
-        onPointerOver={() => setIsHovered(true)}
-        onPointerOut={() => setIsHovered(false)}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          setHoveredBook(book.id);
+        }}
+        onPointerOut={(e) => {
+          e.stopPropagation();
+          if (hoveredBookId === book.id) {
+            setHoveredBook(null);
+          }
+        }}
         onClick={(e) => {
           e.stopPropagation();
           if (e.ctrlKey || e.metaKey) {
@@ -144,8 +152,16 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
         <mesh
           castShadow
           receiveShadow
-          onPointerOver={() => setIsHovered(true)}
-          onPointerOut={() => setIsHovered(false)}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            setHoveredBook(book.id);
+          }}
+          onPointerOut={(e) => {
+            e.stopPropagation();
+            if (hoveredBookId === book.id) {
+              setHoveredBook(null);
+            }
+          }}
           onClick={(e) => {
             e.stopPropagation();
             if (e.ctrlKey || e.metaKey) {
