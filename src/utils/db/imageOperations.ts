@@ -1,5 +1,6 @@
 import { getDB } from './database';
-import { DBImage, STORES } from './schema';
+import type { DBImage } from './schema';
+import { STORES } from './schema';
 
 export async function saveImage(bookId: string, imageData: string, mimeType: string): Promise<string> {
   const db = await getDB();

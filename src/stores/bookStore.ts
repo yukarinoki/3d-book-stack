@@ -21,6 +21,7 @@ export interface BookStackActions {
   addBook: (book: Omit<Book, 'id'>) => Promise<void>;
   removeBook: (id: string) => Promise<void>;
   updateBook: (id: string, updates: Partial<Book>) => Promise<void>;
+  deleteBooks: (ids: string[]) => Promise<void>;
   
   // 選択状態の管理
   selectBook: (id: string) => void;
@@ -109,6 +110,19 @@ export const useBookStore = create<BookStore>()(
           if (updatedBook) {
             await syncBookToIndexedDB(updatedBook);
           }
+        },
+        
+        deleteBooks: async (ids) => {
+          set(
+            (state) => ({
+              books: state.books.filter((book) => !ids.includes(book.id)),
+              selectedBookIds: state.selectedBookIds.filter((bookId) => !ids.includes(bookId)),
+            }),
+            false,
+            'deleteBooks'
+          );
+          // Remove from IndexedDB
+          await Promise.all(ids.map(id => deleteBookFromIndexedDB(id)));
         },
         
         // 選択状態の管理

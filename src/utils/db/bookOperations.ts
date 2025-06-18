@@ -1,5 +1,6 @@
 import { getDB } from './database';
-import { DBBook, STORES } from './schema';
+import type { DBBook } from './schema';
+import { STORES } from './schema';
 import { deleteImagesByBookId } from './imageOperations';
 
 export async function saveBook(book: Omit<DBBook, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {

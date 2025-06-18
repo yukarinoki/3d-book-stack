@@ -1,5 +1,5 @@
-import { Book } from '@/types';
-import { DBBook } from './schema';
+import type { Book } from '@/types';
+import type { DBBook } from './schema';
 import { getAllBooks, updateBook as updateDBBook, deleteBook as deleteDBBook } from './bookOperations';
 import { updateBookCoverImage } from './imageOperations';
 import { initDB, getDB } from './database';
