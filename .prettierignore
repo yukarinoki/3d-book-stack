@@ -1,0 +1,10 @@
+node_modules
+dist
+build
+*.min.*
+*.map
+coverage
+.next
+.nuxt
+*.config.js
+*.config.ts
