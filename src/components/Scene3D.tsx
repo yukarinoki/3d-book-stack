@@ -61,10 +61,10 @@ export const Scene3D = ({ children, physicsEnabled = true }: Scene3DProps) => {
         shadows
       >
         <Suspense fallback={null}>
-          <ambientLight intensity={0.5} />
-          <pointLight position={[10, 10, 10]} intensity={1} castShadow />
+          <ambientLight intensity={0.1} />
+          <pointLight position={[10, 10, 10]} intensity={0.3} castShadow />
 
-          <Environment preset="studio" />
+          <Environment preset="studio" background={false} />
 
           <OrbitControls
             enablePan={true}
