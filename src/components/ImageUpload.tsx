@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useBookStore } from '@/stores';
+import { saveImage } from '@/utils/db/imageOperations';
 
 interface ImageUploadProps {
   bookId: string;
@@ -41,11 +42,22 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
         const imageDataUrl = e.target?.result as string;
         setPreview(imageDataUrl);
         
-        // 本のテクスチャURLを更新
-        updateBook(bookId, { textureUrl: imageDataUrl });
-        
-        // コールバックを実行
-        onUploadComplete?.(imageDataUrl);
+        try {
+          // IndexedDBに画像を保存
+          await saveImage(bookId, imageDataUrl, file.type);
+          
+          // 本のテクスチャURLとcoverImageDataを更新
+          await updateBook(bookId, { 
+            textureUrl: imageDataUrl,
+            coverImageData: imageDataUrl 
+          });
+          
+          // コールバックを実行
+          onUploadComplete?.(imageDataUrl);
+        } catch (error) {
+          console.error('画像の保存に失敗しました:', error);
+          alert('画像の保存に失敗しました');
+        }
         
         setIsUploading(false);
       };
@@ -66,19 +78,34 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
     fileInputRef.current?.click();
   };
 
-  const handleRemoveImage = () => {
+  const handleRemoveImage = async () => {
     setPreview(null);
-    updateBook(bookId, { textureUrl: undefined });
+    await updateBook(bookId, { 
+      textureUrl: undefined,
+      coverImageData: undefined 
+    });
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
   // サンプル画像を選択
-  const handleSampleImageSelect = (imageUrl: string) => {
+  const handleSampleImageSelect = async (imageUrl: string) => {
     setPreview(imageUrl);
-    updateBook(bookId, { textureUrl: imageUrl });
-    onUploadComplete?.(imageUrl);
+    
+    try {
+      // サンプル画像もIndexedDBに保存（MIME typeは画像URLから推測）
+      const mimeType = imageUrl.endsWith('.png') ? 'image/png' : 'image/jpeg';
+      await saveImage(bookId, imageUrl, mimeType);
+      
+      await updateBook(bookId, { 
+        textureUrl: imageUrl,
+        coverImageData: imageUrl 
+      });
+      onUploadComplete?.(imageUrl);
+    } catch (error) {
+      console.error('サンプル画像の保存に失敗しました:', error);
+    }
   };
 
   return (
