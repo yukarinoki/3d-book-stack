@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react';
-import { Leva, useControls } from 'leva';
-import { Layout, Scene3D, Book3D, Floor } from '@/components';
+import { useEffect, useMemo, useState } from 'react';
+import { Leva, useControls, button } from 'leva';
+import { Layout, Scene3D, Book3D, Floor, BookTextureUpload } from '@/components';
 import { useBookStore } from '@/stores';
 import { positionBooksForMode } from '@/utils';
 import './App.css';
@@ -12,8 +12,12 @@ export default function App() {
     physicsEnabled, 
     setPhysicsEnabled,
     setViewMode,
-    initializeBooks 
+    initializeBooks,
+    selectedBookIds,
+    clearSelection
   } = useBookStore();
+  
+  const [showTextureUpload, setShowTextureUpload] = useState(false);
   
   useControls({
     viewMode: {
@@ -30,7 +34,17 @@ export default function App() {
       label: '物理演算を有効にする', 
       value: physicsEnabled,
       onChange: setPhysicsEnabled
-    }
+    },
+    '画像機能': button(() => {}),
+    uploadTexture: button(() => {
+      if (selectedBookIds.length === 1) {
+        setShowTextureUpload(true);
+      } else if (selectedBookIds.length === 0) {
+        alert('本を選択してください');
+      } else {
+        alert('1冊のみ選択してください');
+      }
+    })
   });
 
   // 表示モードに応じて本の位置を計算
@@ -44,6 +58,11 @@ export default function App() {
       initializeBooks();
     }
   }, [books.length, initializeBooks]);
+
+  // 選択された本を取得
+  const selectedBook = selectedBookIds.length === 1 
+    ? books.find(book => book.id === selectedBookIds[0])
+    : null;
 
   return (
     <>
@@ -62,6 +81,16 @@ export default function App() {
           </Scene3D>
         </div>
       </Layout>
+      
+      {showTextureUpload && selectedBook && (
+        <BookTextureUpload
+          book={selectedBook}
+          onClose={() => {
+            setShowTextureUpload(false);
+            clearSelection();
+          }}
+        />
+      )}
     </>
   );
 }
