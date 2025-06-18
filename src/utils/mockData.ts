@@ -70,21 +70,22 @@ export const createMockBooks = (): Book[] => {
 
   // 本を適切にスタックするように位置を計算
   let currentHeight = 0;
-  const stackSpacing = 0.005; // 本と本の間の隙間（5mm）
-  
+  const stackSpacing = 0.05; // 本と本の間の隙間（50mm）
+
   return books.map((book) => {
-    // 本の高さ（物理エンジン用にメートルに変換）
+    // 水平配置時の本の高さは厚み（depth）になる（物理エンジン用にメートルに変換）
     const bookHeight = book.dimensions.depth / 1000;
-    
+
     // 現在の本の中心位置（床から本の中心までの高さ）
     const yPosition = currentHeight + bookHeight / 2;
-    
+
     // 次の本のために高さを更新
     currentHeight += bookHeight + stackSpacing;
-    
+
     return {
       ...book,
       position: [0, yPosition, 0] as [number, number, number],
+      rotation: [-Math.PI / 2, 0, 0] as [number, number, number], // X軸で-90度回転（表紙が上向き）
     };
   });
 };

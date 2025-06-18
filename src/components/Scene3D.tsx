@@ -14,24 +14,24 @@ export const Scene3D = ({ children, physicsEnabled = true }: Scene3DProps) => {
     <div className="w-full h-full">
       <Canvas
         camera={{
-          position: [3, 0.1, 0], // 真横から見る位置（X軸から、本のスタック中央の高さ）
-          fov: 25, // 視野角を狭めて拡大効果を得る
+          position: [2, 1.5, 2], // 斜め上から見下ろす位置（水平な本がよく見える）
+          fov: 35, // 視野角を調整して適切な拡大率を得る
         }}
         shadows
       >
         <Suspense fallback={null}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} castShadow />
-          
+
           <Environment preset="studio" />
-          
+
           <OrbitControls
             enablePan={true}
             enableZoom={true}
             enableRotate={true}
-            target={[0, 0.1, 0]} // 本のスタック中央を見る
+            target={[0, 0.5, 0]} // 本のスタック中央を見る（水平配置に合わせて調整）
           />
-          
+
           {physicsEnabled ? (
             <Physics gravity={[0, -9.81, 0]}>
               {children}
