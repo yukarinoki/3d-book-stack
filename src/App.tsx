@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Leva, useControls } from 'leva';
-import { Layout, Scene3D, Book3D, Floor } from '@/components';
+import { Layout, Scene3D, Book3D, Floor, BookDetail, SelectionControls } from '@/components';
 import { useBookStore } from '@/stores';
 import { positionBooksForMode } from '@/utils';
 import './App.css';
@@ -12,8 +12,10 @@ export default function App() {
     physicsEnabled, 
     setPhysicsEnabled,
     setViewMode,
-    initializeBooks 
+    initializeBooks
   } = useBookStore();
+  
+  const [detailBook, setDetailBook] = useState<string | null>(null);
   
   useControls({
     viewMode: {
@@ -45,6 +47,8 @@ export default function App() {
     }
   }, [books.length, initializeBooks]);
 
+  const selectedBook = detailBook ? books.find(b => b.id === detailBook) : null;
+
   return (
     <>
       <Leva collapsed />
@@ -57,11 +61,17 @@ export default function App() {
                 key={book.id}
                 book={book}
                 physicsEnabled={physicsEnabled}
+                onDoubleClick={() => setDetailBook(book.id)}
               />
             ))}
           </Scene3D>
         </div>
       </Layout>
+      <SelectionControls />
+      <BookDetail 
+        book={selectedBook || null} 
+        onClose={() => setDetailBook(null)} 
+      />
     </>
   );
 }
