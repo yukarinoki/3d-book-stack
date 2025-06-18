@@ -82,9 +82,14 @@ export const createMockBooks = (): Book[] => {
     // 次の本のために高さを更新
     currentHeight += bookHeight + stackSpacing;
 
+    // 水平方向のランダム性を追加（X軸とZ軸）
+    const randomOffsetRange = 0.05; // 5cmの範囲内でランダム
+    const randomX = (Math.random() - 0.5) * randomOffsetRange;
+    const randomZ = (Math.random() - 0.5) * randomOffsetRange;
+
     return {
       ...book,
-      position: [0, yPosition, 0] as [number, number, number],
+      position: [randomX, yPosition, randomZ] as [number, number, number],
       rotation: [-Math.PI / 2, 0, 0] as [number, number, number], // X軸で-90度回転（表紙が上向き）
     };
   });
