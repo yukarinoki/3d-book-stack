@@ -31,11 +31,6 @@ export default function App() {
       },
       onChange: setViewMode
     },
-    enablePhysics: { 
-      label: '物理演算を有効にする', 
-      value: physicsEnabled,
-      onChange: setPhysicsEnabled
-    },
     '画像機能': button(() => {}),
     uploadTexture: button(() => {
       if (selectedBookIds.length === 1) {
