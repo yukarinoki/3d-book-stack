@@ -1,7 +1,7 @@
 import { getDB } from './database';
 import { getAllBooks } from './bookOperations';
-import { getImagesByBookId } from './imageOperations';
-import { DBBook, DBImage } from './schema';
+import { getImagesByBookId, deleteImagesByBookId } from './imageOperations';
+import type { DBBook, DBImage } from './schema';
 
 export interface CacheData {
   books: DBBook[];

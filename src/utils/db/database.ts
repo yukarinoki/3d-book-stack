@@ -1,5 +1,6 @@
-import { openDB, DBSchema, IDBPDatabase } from 'idb';
-import { DBBook, DBImage, DB_NAME, DB_VERSION, STORES } from './schema';
+import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
+import type { DBBook, DBImage } from './schema';
+import { DB_NAME, DB_VERSION, STORES } from './schema';
 
 interface BookStackDBSchema extends DBSchema {
   [STORES.BOOKS]: {
