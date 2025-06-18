@@ -1,7 +1,6 @@
-import { useRef, useMemo, useState, useEffect } from 'react';
-import { Mesh, TextureLoader, SRGBColorSpace, Vector3 } from 'three';
+import { useRef, useState } from 'react';
+import { Mesh, Vector3 } from 'three';
 import { RigidBody } from '@react-three/rapier';
-import type { RapierRigidBody } from '@react-three/rapier';
 import { useDrag } from '@use-gesture/react';
 import { useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
@@ -16,56 +15,18 @@ interface Book3DProps {
 
 export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DProps) => {
   const meshRef = useRef<Mesh>(null);
-  const rigidBodyRef = useRef<RapierRigidBody>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const { camera } = useThree();
   const { updateBook, selectedBookIds, selectBook, toggleBookSelection } = useBookStore();
   
-  const { dimensions, position, rotation, color, textureUrl } = book;
+  const { dimensions, position, rotation, color } = book;
   const isSelected = selectedBookIds.includes(book.id);
   
   // Convert millimeters to meters for physics
   const width = dimensions.width / 1000;
   const height = dimensions.height / 1000;
   const depth = dimensions.depth / 1000;
-
-  // シェイクイベントの処理
-  useEffect(() => {
-    if (!physicsEnabled || !rigidBodyRef.current) return;
-
-    const handleShake = (event: CustomEvent<{ intensity: number }>) => {
-      const rigidBody = rigidBodyRef.current;
-      if (rigidBody) {
-        // シェイクの強度に応じて上方向の力を加える
-        const force = new Vector3(
-          (Math.random() - 0.5) * 2 * event.detail.intensity,
-          event.detail.intensity * 10,
-          (Math.random() - 0.5) * 2 * event.detail.intensity
-        );
-        rigidBody.applyImpulse(force, true);
-      }
-    };
-
-    window.addEventListener('shake-books', handleShake as EventListener);
-    return () => {
-      window.removeEventListener('shake-books', handleShake as EventListener);
-    };
-  }, [physicsEnabled]);
-  
-  // テクスチャを読み込む（textureUrlがある場合のみ）
-  const texture = useMemo(() => {
-    if (!textureUrl) return null;
-    try {
-      const loader = new TextureLoader();
-      const loadedTexture = loader.load(textureUrl);
-      loadedTexture.colorSpace = SRGBColorSpace;
-      return loadedTexture;
-    } catch (error) {
-      console.error('Failed to load texture:', error);
-      return null;
-    }
-  }, [textureUrl]);
   
   // ドラッグ機能の実装
   const bind = useDrag(({ active, movement: [x, y] }) => {
@@ -92,14 +53,7 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
     <boxGeometry args={[width, height, depth]} />
   );
   
-  // テクスチャがある場合とない場合でマテリアルを切り替え
-  const bookMaterial = texture ? (
-    <meshStandardMaterial 
-      map={texture}
-      roughness={0.8}
-      metalness={0.1}
-    />
-  ) : (
+  const bookMaterial = (
     <meshStandardMaterial 
       color={isSelected ? '#FFD700' : (isHovered ? '#A0522D' : (color || '#8B4513'))} 
       roughness={0.8}
@@ -137,13 +91,6 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
       >
         {bookGeometry}
         {bookMaterial}
-        {/* 選択状態を示すアウトライン */}
-        {isSelected && (
-          <mesh scale={[1.05, 1.05, 1.05]}>
-            <boxGeometry args={[width, height, depth]} />
-            <meshBasicMaterial color="#4ECDC4" wireframe />
-          </mesh>
-        )}
       </mesh>
       {isHovered && !isDragging && (
         <Html position={position} center>
@@ -159,7 +106,6 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
   if (physicsEnabled) {
     return (
       <RigidBody
-        ref={rigidBodyRef}
         type="dynamic"
         position={position}
         rotation={rotation}
@@ -189,15 +135,8 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
         >
           {bookGeometry}
           {bookMaterial}
-          {/* 選択状態を示すアウトライン */}
-          {isSelected && (
-            <mesh scale={[1.05, 1.05, 1.05]}>
-              <boxGeometry args={[width, height, depth]} />
-              <meshBasicMaterial color="#4ECDC4" wireframe />
-            </mesh>
-          )}
         </mesh>
-        {isHovered && !isDragging && (
+        {isHovered && (
           <Html position={position} center>
             <div className="bg-black bg-opacity-80 text-white p-2 rounded-md text-sm whitespace-nowrap">
               <div className="font-bold">{book.title}</div>
