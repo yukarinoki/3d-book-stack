@@ -73,13 +73,16 @@ const positionBooksInGrid = (books: Book[]): PositionedBook[] => {
 
 // 背表紙並べモード（本棚風）
 const positionBooksOnShelf = (books: Book[]): PositionedBook[] => {
-  let currentX = 0;
-  const shelfSpacing = 0.01; // 1cmの間隔
+  // 本棚では depth（厚さ）が横幅になる
+  const totalWidth = books.reduce((sum, book) => sum + book.dimensions.depth / 1000, 0);
+  const startX = -totalWidth / 2;
+  let currentX = startX;
   
   return books.map((book) => {
-    const bookWidth = book.dimensions.width / 1000;
-    const x = currentX + bookWidth / 2;
-    currentX += bookWidth + shelfSpacing;
+    // 本棚では本のdepth（厚さ）が横幅になる
+    const bookThickness = book.dimensions.depth / 1000;
+    const x = currentX + bookThickness / 2;
+    currentX += bookThickness; // 完全に密着
     
     return {
       ...book,

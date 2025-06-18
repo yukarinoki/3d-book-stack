@@ -10,7 +10,6 @@ export default function App() {
     books, 
     viewMode,
     physicsEnabled, 
-    setPhysicsEnabled,
     setViewMode,
     initializeBooks,
     selectedBookIds,

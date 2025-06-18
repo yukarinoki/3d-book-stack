@@ -11,7 +11,41 @@ interface Scene3DProps {
 }
 
 export const Scene3D = ({ children, physicsEnabled = true }: Scene3DProps) => {
-  const { clearSelection, setHoveredBook } = useBookStore();
+  const { clearSelection, setHoveredBook, viewMode } = useBookStore();
+  
+  // 表示モードに応じてカメラ位置を設定
+  const getCameraPosition = (): [number, number, number] => {
+    switch (viewMode) {
+      case 'stack':
+        // 背表紙側から見る（Z軸のマイナス方向から）、より低い位置
+        return [0, 0.2, 3];
+      case 'grid':
+        // 真上から見下ろす
+        return [0, 5, 0];
+      case 'shelf':
+        // 正面からほぼ水平に見る
+        return [0, 0.15, 4];
+      default:
+        return [3, 0.1, 2];
+    }
+  };
+  
+  // 表示モードに応じてカメラのターゲットを設定
+  const getCameraTarget = (): [number, number, number] => {
+    switch (viewMode) {
+      case 'stack':
+        // スタックの少し下の方を見る
+        return [0, 0.3, 0];
+      case 'grid':
+        // 真下を見る
+        return [0, 0, 0];
+      case 'shelf':
+        // 本棚の下の方を見る
+        return [0, 0.1, 0];
+      default:
+        return [0, 0.5, 0];
+    }
+  };
   
   return (
     <div className="w-full h-full">
@@ -21,8 +55,8 @@ export const Scene3D = ({ children, physicsEnabled = true }: Scene3DProps) => {
           setHoveredBook(null);
         }}
         camera={{
-          position: [3, 0.1, 2], // 斜め上から見下ろす位置（水平な本がよく見える）
-          fov: 25, // 視野角を調整して適切な拡大率を得る
+          position: getCameraPosition(),
+          fov: viewMode === 'grid' ? 50 : 25, // 表紙並べの時は視野角を広く
         }}
         shadows
       >
@@ -36,7 +70,7 @@ export const Scene3D = ({ children, physicsEnabled = true }: Scene3DProps) => {
             enablePan={true}
             enableZoom={true}
             enableRotate={true}
-            target={[0, 0.5, 0]} // 本のスタック中央を見る（水平配置に合わせて調整）
+            target={getCameraTarget()}
           />
 
           {physicsEnabled ? (
