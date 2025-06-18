@@ -1,17 +1,24 @@
-import { useRef, useMemo } from 'react';
-import { Mesh, TextureLoader, SRGBColorSpace } from 'three';
+import { useRef, useMemo, useState } from 'react';
+import { Mesh, TextureLoader, SRGBColorSpace, Vector3 } from 'three';
 import { RigidBody } from '@react-three/rapier';
-import { useBookStore } from '@/stores';
+import { useDrag } from '@use-gesture/react';
+import { useThree } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import type { Book } from '@/types';
+import { useBookStore } from '@/stores';
 
 interface Book3DProps {
   book: Book;
   physicsEnabled?: boolean;
+  onDoubleClick?: () => void;
 }
 
-export const Book3D = ({ book, physicsEnabled = true }: Book3DProps) => {
+export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DProps) => {
   const meshRef = useRef<Mesh>(null);
-  const { toggleBookSelection, selectedBookIds } = useBookStore();
+  const [isDragging, setIsDragging] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const { camera } = useThree();
+  const { updateBook, selectedBookIds, selectBook, toggleBookSelection } = useBookStore();
   
   const { dimensions, position, rotation, color, textureUrl } = book;
   const isSelected = selectedBookIds.includes(book.id);
@@ -35,6 +42,27 @@ export const Book3D = ({ book, physicsEnabled = true }: Book3DProps) => {
     }
   }, [textureUrl]);
   
+  // ドラッグ機能の実装
+  const bind = useDrag(({ active, movement: [x, y] }) => {
+    if (!physicsEnabled && meshRef.current) {
+      const distance = camera.position.distanceTo(new Vector3(...(position || [0, 0, 0])));
+      const factor = distance * 0.001;
+      
+      const newPosition: [number, number, number] = [
+        (position?.[0] || 0) + x * factor,
+        (position?.[1] || 0),
+        (position?.[2] || 0) - y * factor
+      ];
+      
+      if (active) {
+        meshRef.current.position.set(...newPosition);
+      } else {
+        updateBook(book.id, { position: newPosition });
+      }
+    }
+    setIsDragging(active);
+  });
+  
   const bookGeometry = (
     <boxGeometry args={[width, height, depth]} />
   );
@@ -48,36 +76,59 @@ export const Book3D = ({ book, physicsEnabled = true }: Book3DProps) => {
     />
   ) : (
     <meshStandardMaterial 
-      color={color || '#8B4513'} 
+      color={isSelected ? '#FFD700' : (isHovered ? '#A0522D' : (color || '#8B4513'))} 
       roughness={0.8}
       metalness={0.1}
+      emissive={isSelected ? '#FFD700' : undefined}
+      emissiveIntensity={isSelected ? 0.2 : 0}
     />
   );
   
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    toggleBookSelection(book.id);
-  };
-
   const bookMesh = (
-    <mesh
-      ref={meshRef}
-      position={position}
-      rotation={rotation}
-      castShadow
-      receiveShadow
-      onClick={handleClick}
-    >
-      {bookGeometry}
-      {bookMaterial}
-      {/* 選択状態を示すアウトライン */}
-      {isSelected && (
-        <mesh scale={[1.05, 1.05, 1.05]}>
-          <boxGeometry args={[width, height, depth]} />
-          <meshBasicMaterial color="#4ECDC4" wireframe />
-        </mesh>
+    <>
+      <mesh
+        ref={meshRef}
+        position={position}
+        rotation={rotation}
+        castShadow
+        receiveShadow
+        onPointerOver={() => setIsHovered(true)}
+        onPointerOut={() => setIsHovered(false)}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (e.ctrlKey || e.metaKey) {
+            toggleBookSelection(book.id);
+          } else {
+            selectBook(book.id);
+          }
+        }}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          if (onDoubleClick) {
+            onDoubleClick();
+          }
+        }}
+        {...(!physicsEnabled ? bind() : {})}
+      >
+        {bookGeometry}
+        {bookMaterial}
+        {/* 選択状態を示すアウトライン */}
+        {isSelected && (
+          <mesh scale={[1.05, 1.05, 1.05]}>
+            <boxGeometry args={[width, height, depth]} />
+            <meshBasicMaterial color="#4ECDC4" wireframe />
+          </mesh>
+        )}
+      </mesh>
+      {isHovered && !isDragging && (
+        <Html position={position} center>
+          <div className="bg-black bg-opacity-80 text-white p-2 rounded-md text-sm whitespace-nowrap">
+            <div className="font-bold">{book.title}</div>
+            <div className="text-xs">{book.author}</div>
+          </div>
+        </Html>
       )}
-    </mesh>
+    </>
   );
   
   if (physicsEnabled) {
@@ -93,7 +144,22 @@ export const Book3D = ({ book, physicsEnabled = true }: Book3DProps) => {
         <mesh
           castShadow
           receiveShadow
-          onClick={handleClick}
+          onPointerOver={() => setIsHovered(true)}
+          onPointerOut={() => setIsHovered(false)}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (e.ctrlKey || e.metaKey) {
+              toggleBookSelection(book.id);
+            } else {
+              selectBook(book.id);
+            }
+          }}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            if (onDoubleClick) {
+              onDoubleClick();
+            }
+          }}
         >
           {bookGeometry}
           {bookMaterial}
@@ -105,6 +171,14 @@ export const Book3D = ({ book, physicsEnabled = true }: Book3DProps) => {
             </mesh>
           )}
         </mesh>
+        {isHovered && !isDragging && (
+          <Html position={position} center>
+            <div className="bg-black bg-opacity-80 text-white p-2 rounded-md text-sm whitespace-nowrap">
+              <div className="font-bold">{book.title}</div>
+              <div className="text-xs">{book.author}</div>
+            </div>
+          </Html>
+        )}
       </RigidBody>
     );
   }

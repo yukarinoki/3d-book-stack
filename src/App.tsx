@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Leva, useControls, button } from 'leva';
-import { Layout, Scene3D, Book3D, Floor, BookTextureUpload } from '@/components';
+import { Layout, Scene3D, Book3D, Floor, BookTextureUpload, BookDetail, SelectionControls } from '@/components';
 import { useBookStore } from '@/stores';
 import { positionBooksForMode } from '@/utils';
 import './App.css';
@@ -18,6 +18,7 @@ export default function App() {
   } = useBookStore();
   
   const [showTextureUpload, setShowTextureUpload] = useState(false);
+  const [detailBook, setDetailBook] = useState<string | null>(null);
   
   useControls({
     viewMode: {
@@ -59,10 +60,13 @@ export default function App() {
     }
   }, [books.length, initializeBooks]);
 
-  // 選択された本を取得
-  const selectedBook = selectedBookIds.length === 1 
+  // 選択された本を取得（テクスチャアップロード用）
+  const selectedBookForTexture = selectedBookIds.length === 1 
     ? books.find(book => book.id === selectedBookIds[0])
     : null;
+  
+  // 詳細表示用の本を取得
+  const selectedBookForDetail = detailBook ? books.find(b => b.id === detailBook) : null;
 
   return (
     <>
@@ -76,21 +80,28 @@ export default function App() {
                 key={book.id}
                 book={book}
                 physicsEnabled={physicsEnabled}
+                onDoubleClick={() => setDetailBook(book.id)}
               />
             ))}
           </Scene3D>
         </div>
       </Layout>
       
-      {showTextureUpload && selectedBook && (
+      {showTextureUpload && selectedBookForTexture && (
         <BookTextureUpload
-          book={selectedBook}
+          book={selectedBookForTexture}
           onClose={() => {
             setShowTextureUpload(false);
             clearSelection();
           }}
         />
       )}
+      
+      <SelectionControls />
+      <BookDetail 
+        book={selectedBookForDetail || null} 
+        onClose={() => setDetailBook(null)} 
+      />
     </>
   );
 }
