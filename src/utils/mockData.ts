@@ -9,7 +9,6 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 148, height: 210, depth: 15 }, // A5文庫本
       bookType: 'paperback',
       color: '#FF6B6B',
-      position: [0, 2, 0],
     },
     {
       id: '2',
@@ -18,7 +17,6 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 182, height: 257, depth: 25 }, // B5ハードカバー
       bookType: 'hardcover',
       color: '#4ECDC4',
-      position: [0, 3, 0],
     },
     {
       id: '3',
@@ -27,7 +25,6 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 148, height: 210, depth: 12 }, // A5薄型
       bookType: 'softcover',
       color: '#45B7D1',
-      position: [0, 4, 0],
     },
     {
       id: '4',
@@ -36,7 +33,6 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 148, height: 210, depth: 18 }, // A5文庫本
       bookType: 'paperback',
       color: '#F7DC6F',
-      position: [0, 5, 0],
     },
     {
       id: '5',
@@ -45,7 +41,6 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 182, height: 257, depth: 30 }, // B5ハードカバー
       bookType: 'hardcover',
       color: '#BB8FCE',
-      position: [0, 6, 0],
     },
     {
       id: '6',
@@ -54,7 +49,6 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 112, height: 174, depth: 8 }, // B6漫画サイズ
       bookType: 'manga',
       color: '#85C1E9',
-      position: [1, 2, 0],
     },
     {
       id: '7',
@@ -63,7 +57,6 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 148, height: 210, depth: 20 }, // A5
       bookType: 'softcover',
       color: '#F8C471',
-      position: [1, 3, 0],
     },
     {
       id: '8',
@@ -72,9 +65,26 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 182, height: 257, depth: 28 }, // B5
       bookType: 'hardcover',
       color: '#82E0AA',
-      position: [1, 4, 0],
     },
   ];
 
-  return books;
+  // 本を適切にスタックするように位置を計算
+  let currentHeight = 0;
+  const stackSpacing = 0.005; // 本と本の間の隙間（5mm）
+  
+  return books.map((book) => {
+    // 本の高さ（物理エンジン用にメートルに変換）
+    const bookHeight = book.dimensions.depth / 1000;
+    
+    // 現在の本の中心位置（床から本の中心までの高さ）
+    const yPosition = currentHeight + bookHeight / 2;
+    
+    // 次の本のために高さを更新
+    currentHeight += bookHeight + stackSpacing;
+    
+    return {
+      ...book,
+      position: [0, yPosition, 0] as [number, number, number],
+    };
+  });
 };

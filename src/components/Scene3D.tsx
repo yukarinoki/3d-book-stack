@@ -14,8 +14,8 @@ export const Scene3D = ({ children, physicsEnabled = true }: Scene3DProps) => {
     <div className="w-full h-full">
       <Canvas
         camera={{
-          position: [0, 5, 10],
-          fov: 45,
+          position: [3, 0.1, 0], // 真横から見る位置（X軸から、本のスタック中央の高さ）
+          fov: 25, // 視野角を狭めて拡大効果を得る
         }}
         shadows
       >
@@ -29,7 +29,7 @@ export const Scene3D = ({ children, physicsEnabled = true }: Scene3DProps) => {
             enablePan={true}
             enableZoom={true}
             enableRotate={true}
-            target={[0, 0, 0]}
+            target={[0, 0.1, 0]} // 本のスタック中央を見る
           />
           
           {physicsEnabled ? (

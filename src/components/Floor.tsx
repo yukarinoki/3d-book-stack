@@ -5,7 +5,7 @@ interface FloorProps {
   position?: [number, number, number];
 }
 
-export const Floor = ({ size = 20, position = [0, -2, 0] }: FloorProps) => {
+export const Floor = ({ size = 20, position = [0, -0.05, 0] }: FloorProps) => {
   return (
     <RigidBody type="fixed" position={position}>
       <mesh receiveShadow>
