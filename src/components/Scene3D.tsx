@@ -51,8 +51,12 @@ export const Scene3D = ({ children, physicsEnabled = true }: Scene3DProps) => {
     <div className="w-full h-full">
       <Canvas
         onPointerMissed={() => {
+          console.log('Canvas onPointerMissed fired');
           clearSelection();
           setHoveredBook(null);
+        }}
+        onPointerDown={(e) => {
+          console.log('Canvas onPointerDown fired', e);
         }}
         camera={{
           position: getCameraPosition(),

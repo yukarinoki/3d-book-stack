@@ -55,7 +55,7 @@ const initialState: BookStackState = {
   books: [],
   selectedBookIds: [],
   viewMode: 'stack',
-  physicsEnabled: true,
+  physicsEnabled: false,
   hoveredBookId: null,
 };
 
@@ -132,15 +132,18 @@ export const useBookStore = create<BookStore>()(
         
         // 選択状態の管理
         selectBook: (id) => {
+          console.log('selectBook called with id:', id);
+          console.log('Current selectedBookIds before:', get().selectedBookIds);
+          
           set(
-            (state) => ({
-              selectedBookIds: state.selectedBookIds.includes(id)
-                ? state.selectedBookIds
-                : [...state.selectedBookIds, id],
-            }),
+            {
+              selectedBookIds: [id], // 単一選択：新しい本を選択すると以前の選択はクリア
+            },
             false,
             'selectBook'
           );
+          
+          console.log('selectedBookIds after:', get().selectedBookIds);
         },
         
         deselectBook: (id) => {
@@ -154,10 +157,15 @@ export const useBookStore = create<BookStore>()(
         },
         
         toggleBookSelection: (id) => {
+          console.log('toggleBookSelection called with id:', id);
           const { selectedBookIds } = get();
+          console.log('Current selectedBookIds:', selectedBookIds);
+          
           if (selectedBookIds.includes(id)) {
+            console.log('Book is selected, deselecting...');
             get().deselectBook(id);
           } else {
+            console.log('Book is not selected, selecting...');
             get().selectBook(id);
           }
         },

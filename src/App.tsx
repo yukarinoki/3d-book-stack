@@ -6,19 +6,20 @@ import { positionBooksForMode } from '@/utils';
 import './App.css';
 
 export default function App() {
-  const { 
-    books, 
+  const {
+    books,
     viewMode,
-    physicsEnabled, 
+    physicsEnabled,
+    setPhysicsEnabled,
     setViewMode,
     initializeBooks,
     selectedBookIds,
     clearSelection
   } = useBookStore();
-  
+
   const [showTextureUpload, setShowTextureUpload] = useState(false);
   const [detailBook, setDetailBook] = useState<string | null>(null);
-  
+
   useControls({
     viewMode: {
       label: '表示モード',
@@ -30,17 +31,69 @@ export default function App() {
       },
       onChange: setViewMode
     },
-    '画像機能': button(() => {}),
+    enablePhysics: {
+      label: '物理演算',
+      value: physicsEnabled,
+      onChange: setPhysicsEnabled
+    },
+    '画像機能': button(() => { }),
     uploadTexture: button(() => {
-      if (selectedBookIds.length === 1) {
+      // useBookStore.getState()で最新の状態を直接取得
+      const currentState = useBookStore.getState();
+      const currentSelectedIds = currentState.selectedBookIds;
+      const currentBooks = currentState.books;
+      const currentSelectedBook = currentSelectedIds.length === 1
+        ? currentBooks.find(b => b.id === currentSelectedIds[0])
+        : null;
+
+      console.log('Current selected book:', currentSelectedBook);
+
+      if (currentSelectedIds.length === 1) {
         setShowTextureUpload(true);
-      } else if (selectedBookIds.length === 0) {
+      } else if (currentSelectedIds.length === 0) {
         alert('本を選択してください');
       } else {
         alert('1冊のみ選択してください');
       }
     })
   });
+
+  // 選択された本の情報をLevaに表示
+  useControls('選択中の本', () => {
+    const selectedBook = selectedBookIds.length > 0
+      ? books.find(book => book.id === selectedBookIds[0])
+      : null;
+
+    return {
+      title: {
+        label: 'タイトル',
+        value: selectedBook?.title || '未選択',
+        editable: false,
+      },
+      author: {
+        label: '著者',
+        value: selectedBook?.author || '未選択',
+        editable: false,
+      },
+      dimensions: {
+        label: 'サイズ (mm)',
+        value: selectedBook
+          ? `${selectedBook.dimensions.width} × ${selectedBook.dimensions.height} × ${selectedBook.dimensions.depth}`
+          : '未選択',
+        editable: false,
+      },
+      bookType: {
+        label: '製本タイプ',
+        value: selectedBook?.bookType || '未選択',
+        editable: false,
+      },
+      selectedCount: {
+        label: '選択数',
+        value: selectedBookIds.length,
+        editable: false,
+      },
+    };
+  }, { collapsed: selectedBookIds.length === 0 }, [selectedBookIds, books]);
 
   // 表示モードに応じて本の位置を計算
   const positionedBooks = useMemo(() => {
@@ -55,10 +108,10 @@ export default function App() {
   }, [books.length, initializeBooks]);
 
   // 選択された本を取得（テクスチャアップロード用）
-  const selectedBookForTexture = selectedBookIds.length === 1 
+  const selectedBookForTexture = selectedBookIds.length === 1
     ? books.find(book => book.id === selectedBookIds[0])
     : null;
-  
+
   // 詳細表示用の本を取得
   const selectedBookForDetail = detailBook ? books.find(b => b.id === detailBook) : null;
 
@@ -80,7 +133,7 @@ export default function App() {
           </Scene3D>
         </div>
       </Layout>
-      
+
       {showTextureUpload && selectedBookForTexture && (
         <BookTextureUpload
           book={selectedBookForTexture}
@@ -90,11 +143,11 @@ export default function App() {
           }}
         />
       )}
-      
+
       <SelectionControls />
-      <BookDetail 
-        book={selectedBookForDetail || null} 
-        onClose={() => setDetailBook(null)} 
+      <BookDetail
+        book={selectedBookForDetail || null}
+        onClose={() => setDetailBook(null)}
       />
     </>
   );

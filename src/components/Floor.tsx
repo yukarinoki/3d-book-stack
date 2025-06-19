@@ -1,5 +1,6 @@
 import { RigidBody } from '@react-three/rapier';
 import { Grid } from '@react-three/drei';
+import { useBookStore } from '@/stores';
 
 interface FloorProps {
   size?: number;
@@ -7,15 +8,19 @@ interface FloorProps {
 }
 
 export const Floor = ({ size = 20, position = [0, -0.05, 0] }: FloorProps) => {
+  const { physicsEnabled } = useBookStore();
+  
   return (
     <>
-      {/* 物理演算用の透明な床 */}
-      <RigidBody type="fixed" position={position}>
-        <mesh>
-          <boxGeometry args={[size, 0.1, size]} />
-          <meshBasicMaterial visible={false} />
-        </mesh>
-      </RigidBody>
+      {/* 物理演算用の透明な床（物理演算が有効な場合のみ） */}
+      {physicsEnabled && (
+        <RigidBody type="fixed" position={position}>
+          <mesh>
+            <boxGeometry args={[size, 0.1, size]} />
+            <meshBasicMaterial visible={false} />
+          </mesh>
+        </RigidBody>
+      )}
       
       {/* 上面のみ表示される床（不透明） */}
       <mesh 

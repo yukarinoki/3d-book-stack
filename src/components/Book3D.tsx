@@ -23,6 +23,8 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
   const isSelected = selectedBookIds.includes(book.id);
   const isHovered = hoveredBookId === book.id;
   
+  console.log(`Book3D - ${book.title} (${book.id}): isSelected = ${isSelected}, selectedBookIds = [${selectedBookIds.join(', ')}]`);
+  
   // Convert millimeters to meters for physics
   const width = dimensions.width / 1000;
   const height = dimensions.height / 1000;
@@ -104,9 +106,15 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
         }}
         onClick={(e) => {
           e.stopPropagation();
+          console.log('Book3D onClick fired for book:', book.id, book.title);
+          console.log('Ctrl/Meta key pressed:', e.ctrlKey || e.metaKey);
+          console.log('Current selectedBookIds:', selectedBookIds);
+          
           if (e.ctrlKey || e.metaKey) {
+            console.log('Calling toggleBookSelection');
             toggleBookSelection(book.id);
           } else {
+            console.log('Calling selectBook');
             selectBook(book.id);
           }
         }}
@@ -148,8 +156,10 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
         restitution={0.2}
         friction={0.7}
         mass={1}
+        colliders="cuboid"
       >
         <mesh
+          ref={meshRef}
           castShadow
           receiveShadow
           onPointerOver={(e) => {
@@ -164,9 +174,15 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
           }}
           onClick={(e) => {
             e.stopPropagation();
+            console.log('Book3D onClick (physics) fired for book:', book.id, book.title);
+            console.log('Ctrl/Meta key pressed:', e.ctrlKey || e.metaKey);
+            console.log('Current selectedBookIds:', selectedBookIds);
+            
             if (e.ctrlKey || e.metaKey) {
+              console.log('Calling toggleBookSelection');
               toggleBookSelection(book.id);
             } else {
+              console.log('Calling selectBook');
               selectBook(book.id);
             }
           }}
@@ -188,7 +204,7 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
           )}
         </mesh>
         {isHovered && (
-          <Html position={position} center>
+          <Html center>
             <div className="bg-black bg-opacity-80 text-white p-2 rounded-md text-sm whitespace-nowrap">
               <div className="font-bold">{book.title}</div>
               <div className="text-xs">{book.author}</div>
