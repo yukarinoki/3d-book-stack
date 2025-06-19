@@ -20,7 +20,7 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
   const { camera } = useThree();
   const { updateBook, selectedBookIds, selectBook, toggleBookSelection, hoveredBookId, setHoveredBook } = useBookStore();
 
-  const { dimensions, position, rotation, color, textureUrl } = book;
+  const { dimensions, position, rotation, color, textureUrl, spineTextureUrl, backCoverTextureUrl, topBottomTextureUrl, edgeColor } = book;
   const isSelected = selectedBookIds.includes(book.id);
   const isHovered = hoveredBookId === book.id;
 
@@ -31,19 +31,19 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
   const height = dimensions.height / 1000;
   const depth = dimensions.depth / 1000;
 
-  // テクスチャを読み込む（textureUrlがある場合のみ）
-  const texture = useMemo(() => {
-    if (!textureUrl) {
-      console.log(`[Book3D] ${book.title}: No texture URL provided`);
+  // テクスチャを読み込む汎用関数
+  const loadTextureWithSettings = (url: string | undefined, faceName: string) => {
+    if (!url) {
+      console.log(`[Book3D] ${book.title}: No ${faceName} texture URL provided`);
       return null;
     }
 
-    console.log(`[Book3D] ${book.title}: Loading texture from ${textureUrl}`);
+    console.log(`[Book3D] ${book.title}: Loading ${faceName} texture from ${url}`);
 
     try {
       const loader = new TextureLoader();
       const loadedTexture = loader.load(
-        textureUrl,
+        url,
         // onLoad callback
         (texture) => {
           console.log(`[Book3D] ${book.title}: Texture loaded successfully`, {
@@ -87,14 +87,20 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
       // テクスチャを更新
       loadedTexture.needsUpdate = true;
 
-      console.log(`[Book3D] ${book.title}: Texture created with optimized settings`);
+      console.log(`[Book3D] ${book.title}: ${faceName} texture created with optimized settings`);
 
       return loadedTexture;
     } catch (error) {
-      console.error(`[Book3D] ${book.title}: Exception while creating texture:`, error);
+      console.error(`[Book3D] ${book.title}: Exception while creating ${faceName} texture:`, error);
       return null;
     }
-  }, [textureUrl, book.title]);
+  };
+
+  // 各面のテクスチャを読み込む
+  const frontTexture = useMemo(() => loadTextureWithSettings(textureUrl, 'front'), [textureUrl, book.title]);
+  const spineTexture = useMemo(() => loadTextureWithSettings(spineTextureUrl, 'spine'), [spineTextureUrl, book.title]);
+  const backTexture = useMemo(() => loadTextureWithSettings(backCoverTextureUrl, 'back'), [backCoverTextureUrl, book.title]);
+  const topBottomTexture = useMemo(() => loadTextureWithSettings(topBottomTextureUrl, 'topBottom'), [topBottomTextureUrl, book.title]);
 
   // ドラッグ機能の実装
   const bind = useDrag(({ active, movement: [x, y] }) => {
@@ -121,30 +127,116 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
     <boxGeometry args={[width, height, depth]} />
   );
 
-  // テクスチャがある場合とない場合でマテリアルを切り替え
-  console.log(`[Book3D] ${book.title}: Rendering with texture:`, !!texture);
+  // 各面のマテリアルを定義
+  const defaultColor = isSelected ? '#FFD700' : (isHovered ? '#A0522D' : (color || '#8B4513'));
+  const edgeMaterialColor = edgeColor || '#F5DEB3'; // デフォルトはクリーム色
 
-  const bookMaterial = texture ? (
-    <meshStandardMaterial
-      map={texture}
-      roughness={0.8}
-      metalness={0.1}
-      onUpdate={(material) => {
-        console.log(`[Book3D] ${book.title}: Material updated with texture`, {
-          map: material.map,
-          mapIsTexture: material.map?.isTexture,
-          needsUpdate: material.needsUpdate
-        });
-      }}
-    />
-  ) : (
-    <meshStandardMaterial
-      color={isSelected ? '#FFD700' : (isHovered ? '#A0522D' : (color || '#8B4513'))}
-      roughness={0.8}
-      metalness={0.1}
-      emissive={isSelected ? '#FFD700' : undefined}
-      emissiveIntensity={isSelected ? 0.2 : 0}
-    />
+  // 6面のマテリアルをJSXで定義（BoxGeometryの面の順番: 右、左、上、下、前、後）
+  const renderMaterials = () => (
+    <>
+      {/* 0: 右面（+X） - 小口 */}
+      <meshStandardMaterial
+        attach="material-0"
+        color={edgeMaterialColor}
+        roughness={0.8}
+        metalness={0.1}
+      />
+      
+      {/* 1: 左面（-X） - 背表紙 */}
+      {spineTexture ? (
+        <meshStandardMaterial
+          attach="material-1"
+          map={spineTexture}
+          roughness={0.8}
+          metalness={0.1}
+        />
+      ) : (
+        <meshStandardMaterial
+          attach="material-1"
+          color={defaultColor}
+          roughness={0.8}
+          metalness={0.1}
+          emissive={isSelected ? '#FFD700' : undefined}
+          emissiveIntensity={isSelected ? 0.2 : 0}
+        />
+      )}
+      
+      {/* 2: 上面（+Y） - 天 */}
+      {topBottomTexture ? (
+        <meshStandardMaterial
+          attach="material-2"
+          map={topBottomTexture}
+          roughness={0.8}
+          metalness={0.1}
+        />
+      ) : (
+        <meshStandardMaterial
+          attach="material-2"
+          color={defaultColor}
+          roughness={0.8}
+          metalness={0.1}
+          emissive={isSelected ? '#FFD700' : undefined}
+          emissiveIntensity={isSelected ? 0.2 : 0}
+        />
+      )}
+      
+      {/* 3: 下面（-Y） - 地 */}
+      {topBottomTexture ? (
+        <meshStandardMaterial
+          attach="material-3"
+          map={topBottomTexture}
+          roughness={0.8}
+          metalness={0.1}
+        />
+      ) : (
+        <meshStandardMaterial
+          attach="material-3"
+          color={defaultColor}
+          roughness={0.8}
+          metalness={0.1}
+          emissive={isSelected ? '#FFD700' : undefined}
+          emissiveIntensity={isSelected ? 0.2 : 0}
+        />
+      )}
+      
+      {/* 4: 前面（+Z） - 表紙 */}
+      {frontTexture ? (
+        <meshStandardMaterial
+          attach="material-4"
+          map={frontTexture}
+          roughness={0.8}
+          metalness={0.1}
+        />
+      ) : (
+        <meshStandardMaterial
+          attach="material-4"
+          color={defaultColor}
+          roughness={0.8}
+          metalness={0.1}
+          emissive={isSelected ? '#FFD700' : undefined}
+          emissiveIntensity={isSelected ? 0.2 : 0}
+        />
+      )}
+      
+      {/* 5: 後面（-Z） - 裏表紙 */}
+      {backTexture ? (
+        <meshStandardMaterial
+          attach="material-5"
+          map={backTexture}
+          roughness={0.8}
+          metalness={0.1}
+        />
+      ) : (
+        <meshStandardMaterial
+          attach="material-5"
+          color={defaultColor}
+          roughness={0.8}
+          metalness={0.1}
+          emissive={isSelected ? '#FFD700' : undefined}
+          emissiveIntensity={isSelected ? 0.2 : 0}
+        />
+      )}
+    </>
   );
 
   const bookMesh = (
@@ -188,7 +280,7 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
         {...(!physicsEnabled ? bind() : {})}
       >
         {bookGeometry}
-        {bookMaterial}
+        {renderMaterials()}
         {/* 選択状態を示すアウトライン */}
         {isSelected && (
           <mesh scale={[1.05, 1.05, 1.05]}>
@@ -255,7 +347,7 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
           }}
         >
           {bookGeometry}
-          {bookMaterial}
+          {renderMaterials()}
           {/* 選択状態を示すアウトライン */}
           {isSelected && (
             <mesh scale={[1.05, 1.05, 1.05]}>

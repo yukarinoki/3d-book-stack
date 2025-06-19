@@ -9,6 +9,7 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 148, height: 210, depth: 15 }, // A5文庫本
       bookType: 'paperback',
       color: '#FF6B6B',
+      edgeColor: '#F5DEB3', // クリーム色
     },
     {
       id: '2',
@@ -17,6 +18,7 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 182, height: 257, depth: 25 }, // B5ハードカバー
       bookType: 'hardcover',
       color: '#4ECDC4',
+      edgeColor: '#FFF8DC', // コーンシルク
     },
     {
       id: '3',
@@ -25,6 +27,7 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 148, height: 210, depth: 12 }, // A5薄型
       bookType: 'softcover',
       color: '#45B7D1',
+      edgeColor: '#FAEBD7', // アンティークホワイト
     },
     {
       id: '4',
@@ -33,6 +36,7 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 148, height: 210, depth: 18 }, // A5文庫本
       bookType: 'paperback',
       color: '#F7DC6F',
+      edgeColor: '#FFE4C4', // ビスク
     },
     {
       id: '5',
@@ -41,6 +45,7 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 182, height: 257, depth: 30 }, // B5ハードカバー
       bookType: 'hardcover',
       color: '#BB8FCE',
+      edgeColor: '#F5F5DC', // ベージュ
     },
     {
       id: '6',
@@ -49,6 +54,7 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 112, height: 174, depth: 8 }, // B6漫画サイズ
       bookType: 'manga',
       color: '#85C1E9',
+      edgeColor: '#FFFACD', // レモンシフォン
     },
     {
       id: '7',
@@ -57,6 +63,7 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 148, height: 210, depth: 20 }, // A5
       bookType: 'softcover',
       color: '#F8C471',
+      edgeColor: '#FAF0E6', // リネン
     },
     {
       id: '8',
@@ -65,6 +72,7 @@ export const createMockBooks = (): Book[] => {
       dimensions: { width: 182, height: 257, depth: 28 }, // B5
       bookType: 'hardcover',
       color: '#82E0AA',
+      edgeColor: '#F0E68C', // カーキ
     },
   ];
 

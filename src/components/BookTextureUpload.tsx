@@ -9,9 +9,13 @@ interface BookTextureUploadProps {
   onClose?: () => void;
 }
 
+type TabType = 'front' | 'spine' | 'back' | 'topBottom' | 'edge';
+
 export function BookTextureUpload({ book, onClose }: BookTextureUploadProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<TabType>('front');
+  const [edgeColor, setEdgeColor] = useState(book.edgeColor || '#F5DEB3'); // デフォルトはクリーム色
   const { updateBook } = useBookStore();
 
 
@@ -23,11 +27,27 @@ export function BookTextureUpload({ book, onClose }: BookTextureUploadProps) {
 
   // 画像編集保存時の処理
   const handleEditSave = useCallback((editedImageUrl: string) => {
-    updateBook(book.id, { textureUrl: editedImageUrl });
+    // activeTabに応じて適切なプロパティを更新
+    const updateData: Partial<Book> = {};
+    switch (activeTab) {
+      case 'front':
+        updateData.textureUrl = editedImageUrl;
+        updateData.coverImageData = editedImageUrl;
+        break;
+      case 'spine':
+        updateData.spineTextureUrl = editedImageUrl;
+        break;
+      case 'back':
+        updateData.backCoverTextureUrl = editedImageUrl;
+        break;
+      case 'topBottom':
+        updateData.topBottomTextureUrl = editedImageUrl;
+        break;
+    }
+    updateBook(book.id, updateData);
     setIsEditing(false);
     setTempImageUrl(null);
-    onClose?.();
-  }, [book.id, updateBook, onClose]);
+  }, [book.id, updateBook, activeTab]);
 
   // キャンセル処理
   const handleEditCancel = useCallback(() => {
@@ -35,8 +55,42 @@ export function BookTextureUpload({ book, onClose }: BookTextureUploadProps) {
     setTempImageUrl(null);
   }, []);
 
-  // 本のアスペクト比を計算
-  const aspectRatio = book.dimensions.height / book.dimensions.width;
+  // アクティブタブに応じてアスペクト比を計算
+  const getAspectRatio = () => {
+    switch (activeTab) {
+      case 'front':
+      case 'back':
+        return book.dimensions.height / book.dimensions.width;
+      case 'spine':
+        return book.dimensions.height / book.dimensions.depth;
+      case 'topBottom':
+        return book.dimensions.depth / book.dimensions.width;
+      default:
+        return 1;
+    }
+  };
+
+  // 小口の色を保存
+  const handleEdgeColorChange = (color: string) => {
+    setEdgeColor(color);
+    updateBook(book.id, { edgeColor: color });
+  };
+
+  // 現在の面の画像URLを取得
+  const getCurrentImageUrl = () => {
+    switch (activeTab) {
+      case 'front':
+        return book.textureUrl;
+      case 'spine':
+        return book.spineTextureUrl;
+      case 'back':
+        return book.backCoverTextureUrl;
+      case 'topBottom':
+        return book.topBottomTextureUrl;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div
@@ -58,15 +112,71 @@ export function BookTextureUpload({ book, onClose }: BookTextureUploadProps) {
           position: 'relative',
         }}
       >
-        <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-xl font-bold">本の表紙画像を設定</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
-            aria-label="閉じる"
-          >
-            ×
-          </button>
+        <div className="p-6 border-b">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">本の画像・色を設定</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+              aria-label="閉じる"
+            >
+              ×
+            </button>
+          </div>
+          
+          {/* タブナビゲーション */}
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setActiveTab('front')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'front' 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              表紙
+            </button>
+            <button
+              onClick={() => setActiveTab('spine')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'spine' 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              背表紙
+            </button>
+            <button
+              onClick={() => setActiveTab('back')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'back' 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              裏表紙
+            </button>
+            <button
+              onClick={() => setActiveTab('topBottom')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'topBottom' 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              天地
+            </button>
+            <button
+              onClick={() => setActiveTab('edge')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'edge' 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              小口
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
@@ -82,19 +192,52 @@ export function BookTextureUpload({ book, onClose }: BookTextureUploadProps) {
             </p>
           </div>
 
-          {!isEditing ? (
+          {activeTab === 'edge' ? (
+            // 小口の色設定
+            <div>
+              <h3 className="font-semibold text-sm mb-4">小口の色を選択</h3>
+              <div className="flex items-center space-x-4">
+                <input
+                  type="color"
+                  value={edgeColor}
+                  onChange={(e) => handleEdgeColorChange(e.target.value)}
+                  className="w-20 h-10 rounded cursor-pointer"
+                />
+                <span className="text-sm text-gray-600">現在の色: {edgeColor}</span>
+              </div>
+              <div className="mt-4">
+                <p className="text-xs text-gray-500">推奨色:</p>
+                <div className="flex space-x-2 mt-2">
+                  {['#F5DEB3', '#FFF8DC', '#FAEBD7', '#FFE4C4', '#F5F5DC'].map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => handleEdgeColorChange(color)}
+                      className="w-8 h-8 rounded border-2 border-gray-300 hover:border-gray-400"
+                      style={{ backgroundColor: color }}
+                      aria-label={`色を${color}に設定`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : !isEditing ? (
             <div>
               <ImageUpload
                 bookId={book.id}
+                face={activeTab as 'front' | 'spine' | 'back' | 'topBottom'}
                 onUploadComplete={handleUploadComplete}
               />
 
-              {book.textureUrl && (
+              {getCurrentImageUrl() && (
                 <div className="mt-4">
-                  <h3 className="font-semibold text-sm mb-2">現在の表紙画像</h3>
+                  <h3 className="font-semibold text-sm mb-2">
+                    現在の{activeTab === 'front' ? '表紙' : 
+                            activeTab === 'spine' ? '背表紙' : 
+                            activeTab === 'back' ? '裏表紙' : '天地'}画像
+                  </h3>
                   <img
-                    src={book.textureUrl}
-                    alt="現在の表紙"
+                    src={getCurrentImageUrl()!}
+                    alt={`現在の${activeTab}画像`}
                     className="w-32 h-48 object-cover rounded-lg shadow-md mx-auto"
                   />
                 </div>
@@ -106,7 +249,7 @@ export function BookTextureUpload({ book, onClose }: BookTextureUploadProps) {
                 imageUrl={tempImageUrl}
                 onSave={handleEditSave}
                 onCancel={handleEditCancel}
-                aspectRatio={aspectRatio}
+                aspectRatio={getAspectRatio()}
               />
             )
           )}

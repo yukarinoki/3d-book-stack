@@ -1,20 +1,50 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useBookStore } from '@/stores';
 import { saveImage } from '@/utils/db/imageOperations';
 import { ImageCropModal } from './ImageCropModal';
+import type { Book } from '@/types';
+
+type BookFace = 'front' | 'spine' | 'back' | 'topBottom';
 
 interface ImageUploadProps {
   bookId: string;
+  face?: BookFace;
   onUploadComplete?: (imageUrl: string) => void;
 }
 
-export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
+export function ImageUpload({ bookId, face = 'front', onUploadComplete }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
   const [showCropModal, setShowCropModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { updateBook } = useBookStore();
+  const { updateBook, books } = useBookStore();
+  
+  // 現在の本を取得
+  const book = books.find(b => b.id === bookId);
+  
+  // 現在の面の画像を取得してプレビューに設定
+  useEffect(() => {
+    if (!book) return;
+    
+    let currentImage: string | undefined;
+    switch (face) {
+      case 'front':
+        currentImage = book.textureUrl;
+        break;
+      case 'spine':
+        currentImage = book.spineTextureUrl;
+        break;
+      case 'back':
+        currentImage = book.backCoverTextureUrl;
+        break;
+      case 'topBottom':
+        currentImage = book.topBottomTextureUrl;
+        break;
+    }
+    
+    setPreview(currentImage || null);
+  }, [book, face]);
 
   const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -57,10 +87,26 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
 
   const handleRemoveImage = async () => {
     setPreview(null);
-    await updateBook(bookId, {
-      textureUrl: undefined,
-      coverImageData: undefined
-    });
+    
+    // 選択された面に応じて適切なプロパティをクリア
+    const updateData: Partial<Book> = {};
+    switch (face) {
+      case 'front':
+        updateData.textureUrl = undefined;
+        updateData.coverImageData = undefined;
+        break;
+      case 'spine':
+        updateData.spineTextureUrl = undefined;
+        break;
+      case 'back':
+        updateData.backCoverTextureUrl = undefined;
+        break;
+      case 'topBottom':
+        updateData.topBottomTextureUrl = undefined;
+        break;
+    }
+    await updateBook(bookId, updateData);
+    
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -82,11 +128,24 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
         // IndexedDBに画像を保存
         await saveImage(bookId, base64, blob.type);
 
-        // 本のテクスチャURLとcoverImageDataを更新
-        await updateBook(bookId, {
-          textureUrl: base64,
-          coverImageData: base64
-        });
+        // 選択された面に応じて適切なプロパティを更新
+        const updateData: Partial<Book> = {};
+        switch (face) {
+          case 'front':
+            updateData.textureUrl = base64;
+            updateData.coverImageData = base64;
+            break;
+          case 'spine':
+            updateData.spineTextureUrl = base64;
+            break;
+          case 'back':
+            updateData.backCoverTextureUrl = base64;
+            break;
+          case 'topBottom':
+            updateData.topBottomTextureUrl = base64;
+            break;
+        }
+        await updateBook(bookId, updateData);
 
         // コールバックを実行
         onUploadComplete?.(base64);
