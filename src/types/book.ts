@@ -31,6 +31,8 @@ export interface Book {
   position?: [number, number, number];
   rotation?: [number, number, number];
   textures?: BookTextures; // 新しいテクスチャ管理方式
+  purchaseDate?: string | null; // 購入日 (ISO 8601形式)
+  finishDate?: string | null; // 終読日 (ISO 8601形式)
 }
 
 export interface BookStackState {

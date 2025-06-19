@@ -21,7 +21,8 @@
       "Bash(open test-uv.html)",
       "WebFetch(domain:github.com)",
       "Bash(npm install:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   },

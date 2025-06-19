@@ -8,3 +8,5 @@ export { BookTextureUpload } from './BookTextureUpload';
 export { BookDetail } from './BookDetail';
 export { SelectionControls } from './SelectionControls';
 export { TextureViewModal } from './TextureViewModal';
+export { BookDataTable } from './BookDataTable';
+export { Book3DView } from './Book3DView';
