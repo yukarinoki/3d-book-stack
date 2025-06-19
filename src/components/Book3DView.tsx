@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Leva, useControls, button } from 'leva';
-import { Scene3D, Book3D, Floor, BookTextureUpload, BookDetail, SelectionControls, TextureViewModal } from '@/components';
+import { Scene3D, Book3D, Floor, BookTextureUpload, BookDetail, SelectionControls, TextureViewModal, BookShelfSupport } from '@/components';
 import { useBookStore } from '@/stores';
 import { positionBooksForMode } from '@/utils';
 
@@ -193,6 +193,31 @@ export const Book3DView = () => {
               onDoubleClick={() => setDetailBook(book.id)}
             />
           ))}
+          
+          {/* 本棚モードの時は両端に支えを追加 */}
+          {viewMode === 'shelf' && positionedBooks.length > 0 && (
+            <>
+              {/* 左端の支え */}
+              <BookShelfSupport
+                position={[
+                  positionedBooks[0].position[0] - positionedBooks[0].dimensions.depth / 2000 - 0.01,
+                  0.125,
+                  0
+                ]}
+                physicsEnabled={physicsEnabled}
+              />
+              {/* 右端の支え */}
+              <BookShelfSupport
+                position={[
+                  positionedBooks[positionedBooks.length - 1].position[0] + 
+                  positionedBooks[positionedBooks.length - 1].dimensions.depth / 2000 + 0.01,
+                  0.125,
+                  0
+                ]}
+                physicsEnabled={physicsEnabled}
+              />
+            </>
+          )}
         </Scene3D>
       </div>
 
