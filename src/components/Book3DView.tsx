@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Leva, useControls, button } from 'leva';
-import { Scene3D, Book3D, Floor, BookTextureUpload, BookDetail, SelectionControls, TextureViewModal, BookShelfSupport } from '@/components';
+import { Scene3D, Book3D, Floor, BookTextureUpload, BookDetail, SelectionControls, TextureViewModal, BookShelfSupport, KeyboardHelp } from '@/components';
 import { useBookStore } from '@/stores';
 import { positionBooksForMode } from '@/utils';
+import { useKeyboardControls } from '@/hooks';
 
 export const Book3DView = () => {
   const {
@@ -19,6 +20,9 @@ export const Book3DView = () => {
   const [showTextureUpload, setShowTextureUpload] = useState(false);
   const [showTextureView, setShowTextureView] = useState(false);
   const [detailBook, setDetailBook] = useState<string | null>(null);
+
+  // キーボード操作を有効化
+  useKeyboardControls();
 
   // デバッグ: 状態の変化を監視
   useEffect(() => {
@@ -261,6 +265,7 @@ export const Book3DView = () => {
       })()}
 
       <SelectionControls />
+      <KeyboardHelp />
       <BookDetail
         book={selectedBookForDetail || null}
         onClose={() => setDetailBook(null)}

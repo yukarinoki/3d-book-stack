@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { BookShelfSupport } from '../BookShelfSupport';
-import React from 'react';
 
 // モック
 vi.mock('@react-three/fiber', () => ({

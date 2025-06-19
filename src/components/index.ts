@@ -11,3 +11,4 @@ export { TextureViewModal } from './TextureViewModal';
 export { BookDataTable } from './BookDataTable';
 export { Book3DView } from './Book3DView';
 export { BookShelfSupport } from './BookShelfSupport';
+export { KeyboardHelp } from './KeyboardHelp';
