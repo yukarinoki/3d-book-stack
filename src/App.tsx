@@ -20,6 +20,14 @@ export default function App() {
   const [showTextureUpload, setShowTextureUpload] = useState(false);
   const [detailBook, setDetailBook] = useState<string | null>(null);
 
+  // デバッグ: 状態の変化を監視
+  useEffect(() => {
+    console.log('=== State Change Debug ===');
+    console.log('showTextureUpload state changed to:', showTextureUpload);
+    console.log('selectedBookIds:', selectedBookIds);
+    console.log('books length:', books.length);
+  }, [showTextureUpload, selectedBookIds, books.length]);
+
   useControls('設定', {
     viewMode: {
       label: '表示モード',
@@ -122,9 +130,23 @@ export default function App() {
   }, [books.length, initializeBooks]);
 
   // 選択された本を取得（テクスチャアップロード用）
-  const selectedBookForTexture = selectedBookIds.length === 1
-    ? books.find(book => book.id === selectedBookIds[0])
-    : null;
+  const selectedBookForTexture = useMemo(() => {
+    console.log('=== Computing selectedBookForTexture ===');
+    console.log('selectedBookIds:', selectedBookIds);
+    console.log('selectedBookIds.length:', selectedBookIds.length);
+    console.log('books.length:', books.length);
+
+    if (selectedBookIds.length === 1) {
+      const targetId = selectedBookIds[0];
+      console.log('Looking for book with ID:', targetId);
+      const foundBook = books.find(book => book.id === targetId);
+      console.log('Found book:', foundBook);
+      return foundBook || null;
+    }
+
+    console.log('Returning null (not exactly 1 book selected)');
+    return null;
+  }, [selectedBookIds, books]);
 
   // デバッグ: モーダル表示条件の確認
   useEffect(() => {
@@ -157,15 +179,27 @@ export default function App() {
         </div>
       </Layout>
 
-      {showTextureUpload && selectedBookForTexture && (
-        <BookTextureUpload
-          book={selectedBookForTexture}
-          onClose={() => {
-            setShowTextureUpload(false);
-            clearSelection();
-          }}
-        />
-      )}
+      {(() => {
+        console.log('=== Rendering modal check ===');
+        console.log('showTextureUpload:', showTextureUpload);
+        console.log('selectedBookForTexture:', selectedBookForTexture);
+        console.log('Should render modal:', showTextureUpload && selectedBookForTexture);
+
+        if (showTextureUpload && selectedBookForTexture) {
+          console.log('Rendering BookTextureUpload component');
+          return (
+            <BookTextureUpload
+              book={selectedBookForTexture}
+              onClose={() => {
+                setShowTextureUpload(false);
+                clearSelection();
+              }}
+            />
+          );
+        }
+        console.log('NOT rendering BookTextureUpload component');
+        return null;
+      })()}
 
       <SelectionControls />
       <BookDetail
