@@ -4,12 +4,14 @@ export interface PositionedBook extends Book {
   position: [number, number, number];
   rotation: [number, number, number];
   groupLabel?: string;
+  scale?: number;
 }
 
 export const positionBooksForMode = (
   books: Book[],
   mode: ViewMode,
-  timelinePeriod?: TimelinePeriod
+  timelinePeriod?: TimelinePeriod,
+  selectedBookId?: string
 ): PositionedBook[] => {
   switch (mode) {
     case 'stack':
@@ -22,6 +24,8 @@ export const positionBooksForMode = (
       return positionBooksByTimeline(books, timelinePeriod || 'week');
     case 'rating':
       return positionBooksByRating(books);
+    case 'single':
+      return positionSingleBook(books, selectedBookId || books[0]?.id || '');
     default:
       return positionBooksInStack(books);
   }
@@ -248,6 +252,44 @@ export const positionBooksByRating = (books: Book[]): PositionedBook[] => {
     });
 
     currentX += stackSpacing;
+  });
+
+  return positionedBooks;
+};
+
+// 個別本表示モード
+export const positionSingleBook = (books: Book[], selectedId: string): PositionedBook[] => {
+  // 選択された本を見つける（見つからない場合は最初の本を選択）
+  const selectedBook = books.find(b => b.id === selectedId) || books[0];
+  if (!selectedBook) return [];
+
+  const positionedBooks: PositionedBook[] = [];
+  
+  // 選択された本を中央に大きく配置
+  positionedBooks.push({
+    ...selectedBook,
+    position: [0, 0, 0] as [number, number, number],
+    rotation: [0, 0, 0] as [number, number, number], // 正面を向く
+    scale: 2, // 2倍のスケール
+  });
+
+  // 他の本を背景に円形に配置
+  const otherBooks = books.filter(b => b.id !== selectedBook.id);
+  const radius = 2; // 円の半径
+  const angleStep = (2 * Math.PI) / otherBooks.length;
+
+  otherBooks.forEach((book, index) => {
+    const angle = index * angleStep;
+    const x = radius * Math.cos(angle);
+    const y = radius * Math.sin(angle);
+    const z = -3; // 背景に配置
+
+    positionedBooks.push({
+      ...book,
+      position: [x, y, z] as [number, number, number],
+      rotation: [0, angle + Math.PI / 2, 0] as [number, number, number], // 中心を向く
+      scale: 0.5, // 半分のスケール
+    });
   });
 
   return positionedBooks;

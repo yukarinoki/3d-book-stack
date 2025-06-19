@@ -36,7 +36,7 @@ export interface Book {
   rating?: BookRating; // 評価
 }
 
-export type ViewMode = 'stack' | 'shelf' | 'grid' | 'timeline' | 'rating';
+export type ViewMode = 'stack' | 'shelf' | 'grid' | 'timeline' | 'rating' | 'single';
 export type TimelinePeriod = 'week' | 'month' | 'year';
 export type BookRating = 'bad' | 'good' | 'very good';
 

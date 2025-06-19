@@ -5,11 +5,11 @@ import { RigidBody } from '@react-three/rapier';
 import { useDrag } from '@use-gesture/react';
 import { useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import type { Book } from '@/types';
+import type { PositionedBook } from '@/utils/bookPositioning';
 import { useBookStore } from '@/stores';
 
 interface Book3DProps {
-  book: Book;
+  book: PositionedBook;
   physicsEnabled?: boolean;
   onDoubleClick?: () => void;
 }
@@ -262,6 +262,7 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
         ref={meshRef}
         position={position}
         rotation={rotation}
+        scale={book.scale || 1}
         castShadow
         receiveShadow
         onPointerOver={(e) => {
@@ -330,6 +331,7 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
       >
         <mesh
           ref={meshRef}
+          scale={book.scale || 1}
           castShadow
           receiveShadow
           onPointerOver={(e) => {

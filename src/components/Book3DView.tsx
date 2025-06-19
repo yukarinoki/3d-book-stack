@@ -43,14 +43,16 @@ export const Book3DView = () => {
         '表紙並べ': 'grid',
         '本棚': 'shelf',
         '時系列': 'timeline',
-        '評価別': 'rating'
+        '評価別': 'rating',
+        '個別表示': 'single'
       },
       onChange: setViewMode
     },
     enablePhysics: {
       label: '物理演算',
       value: physicsEnabled,
-      onChange: setPhysicsEnabled
+      onChange: setPhysicsEnabled,
+      render: (get) => get('設定.viewMode') !== 'single' // 個別表示モードでは非表示
     },
     'テクスチャ確認': button(() => {
       console.log('=== テクスチャ確認 button clicked ===');
@@ -161,8 +163,11 @@ export const Book3DView = () => {
 
   // 表示モードに応じて本の位置を計算
   const positionedBooks = useMemo(() => {
-    return positionBooksForMode(books, viewMode, timelinePeriod);
-  }, [books, viewMode, timelinePeriod]);
+    const selectedId = viewMode === 'single' && selectedBookIds.length > 0 
+      ? selectedBookIds[0] 
+      : undefined;
+    return positionBooksForMode(books, viewMode, timelinePeriod, selectedId);
+  }, [books, viewMode, timelinePeriod, selectedBookIds]);
 
   // 初回マウント時に本を初期化
   useEffect(() => {
@@ -206,13 +211,13 @@ export const Book3DView = () => {
     <>
       <Leva collapsed />
       <div className="h-screen p-4">
-        <Scene3D physicsEnabled={physicsEnabled}>
+        <Scene3D physicsEnabled={physicsEnabled && viewMode !== 'single'}>
           <Floor />
           {positionedBooks.map((book) => (
             <Book3D
               key={book.id}
               book={book}
-              physicsEnabled={physicsEnabled}
+              physicsEnabled={physicsEnabled && viewMode !== 'single'}
               onDoubleClick={() => setDetailBook(book.id)}
             />
           ))}
