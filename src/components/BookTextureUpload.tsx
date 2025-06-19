@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { ImageUpload } from './ImageUpload';
 import { ImageEditor } from './ImageEditor';
 import { useBookStore } from '@/stores';
@@ -14,18 +14,6 @@ export function BookTextureUpload({ book, onClose }: BookTextureUploadProps) {
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
   const { updateBook } = useBookStore();
 
-  // デバッグ: コンポーネントのマウント確認
-  useEffect(() => {
-    console.log('=== BookTextureUpload mounted ===');
-    console.log('Book prop:', book);
-    console.log('Book ID:', book.id);
-    console.log('Book title:', book.title);
-    console.log('================================');
-
-    return () => {
-      console.log('=== BookTextureUpload unmounted ===');
-    };
-  }, [book]);
 
   // 画像アップロード完了時の処理
   const handleUploadComplete = useCallback((imageUrl: string) => {
@@ -51,26 +39,46 @@ export function BookTextureUpload({ book, onClose }: BookTextureUploadProps) {
   const aspectRatio = book.dimensions.height / book.dimensions.width;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">本の表紙画像を設定</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
-              aria-label="閉じる"
-            >
-              ×
-            </button>
-          </div>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4 pt-20"
+      style={{
+        zIndex: 99999,
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      }}
+    >
+      <div
+        className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col"
+        style={{
+          zIndex: 100000,
+          position: 'relative',
+        }}
+      >
+        <div className="flex justify-between items-center p-6 border-b">
+          <h2 className="text-xl font-bold">本の表紙画像を設定</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+            aria-label="閉じる"
+          >
+            ×
+          </button>
+        </div>
 
-          <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-semibold text-sm mb-2">選択中の本</h3>
-            <p className="text-sm text-gray-700">{book.title}</p>
-            <p className="text-xs text-gray-500">{book.author}</p>
-            <p className="text-xs text-gray-500 mt-1">
-              サイズ: {book.dimensions.width}mm × {book.dimensions.height}mm
+        <div className="flex-1 overflow-y-auto p-6">
+
+          <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+            <p className="text-xs text-gray-600 mb-1">選択中の本</p>
+            <p className="text-sm text-gray-700">
+              <span className="font-semibold">{book.title}</span>
+              <span className="text-gray-500 mx-2">|</span>
+              <span className="text-gray-600">{book.author}</span>
+              <span className="text-gray-500 mx-2">|</span>
+              <span className="text-gray-600">{book.dimensions.width}×{book.dimensions.height}mm</span>
             </p>
           </div>
 

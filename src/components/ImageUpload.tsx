@@ -40,7 +40,7 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
     try {
       // FileReaderを使用して画像を読み込む
       const reader = new FileReader();
-      
+
       reader.onload = async (e) => {
         const imageDataUrl = e.target?.result as string;
         setTempImageUrl(imageDataUrl);
@@ -66,9 +66,9 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
 
   const handleRemoveImage = async () => {
     setPreview(null);
-    await updateBook(bookId, { 
+    await updateBook(bookId, {
       textureUrl: undefined,
-      coverImageData: undefined 
+      coverImageData: undefined
     });
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -84,29 +84,29 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
   // トリミング完了時の処理
   const handleCropComplete = async (croppedImageUrl: string) => {
     setPreview(croppedImageUrl);
-    
+
     try {
       // クロップした画像をBase64に変換
       const response = await fetch(croppedImageUrl);
       const blob = await response.blob();
       const reader = new FileReader();
-      
+
       reader.onload = async () => {
         const base64 = reader.result as string;
-        
+
         // IndexedDBに画像を保存
         await saveImage(bookId, base64, blob.type);
-        
+
         // 本のテクスチャURLとcoverImageDataを更新
-        await updateBook(bookId, { 
+        await updateBook(bookId, {
           textureUrl: base64,
-          coverImageData: base64 
+          coverImageData: base64
         });
-        
+
         // コールバックを実行
         onUploadComplete?.(base64);
       };
-      
+
       reader.readAsDataURL(blob);
     } catch (error) {
       console.error('画像の保存に失敗しました:', error);
@@ -119,9 +119,9 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
       <div className="flex flex-col items-center">
         {preview && (
           <div className="mb-4 relative">
-            <img 
-              src={preview} 
-              alt="テクスチャプレビュー" 
+            <img
+              src={preview}
+              alt="テクスチャプレビュー"
               className="w-32 h-48 object-cover rounded-lg shadow-md"
             />
             <button
@@ -133,15 +133,18 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
             </button>
           </div>
         )}
-        
-        <button
-          onClick={handleButtonClick}
-          disabled={isUploading}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-        >
-          {isUploading ? 'アップロード中...' : '画像を選択'}
-        </button>
-        
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleButtonClick}
+            disabled={isUploading}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          >
+            {isUploading ? 'アップロード中...' : '画像を選択'}
+          </button>
+          <span className="text-xs text-gray-500">jpg, png, gif</span>
+        </div>
+
         <input
           ref={fileInputRef}
           type="file"
@@ -150,41 +153,8 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
           className="hidden"
         />
       </div>
-      
-      {/* 開発環境でのみサンプル画像を表示 */}
-      {import.meta.env.DEV && (
-        <div className="border-t pt-4">
-          <p className="text-sm font-semibold text-gray-700 mb-2">サンプル画像（開発用）:</p>
-          <div className="grid grid-cols-5 gap-2">
-            {SAMPLE_IMAGES.map((imageUrl, index) => (
-              <button
-                key={imageUrl}
-                onClick={() => handleSampleImageSelect(imageUrl)}
-                className="relative group"
-                title={`サンプル画像 ${index + 1}`}
-              >
-                <img 
-                  src={imageUrl} 
-                  alt={`サンプル ${index + 1}`}
-                  className="w-full h-20 object-cover rounded border-2 border-transparent group-hover:border-blue-500 transition-colors"
-                  onError={(e) => {
-                    // 画像が見つからない場合は親要素を非表示にする
-                    const button = (e.target as HTMLImageElement).closest('button');
-                    if (button) {
-                      button.style.display = 'none';
-                    }
-                  }}
-                />
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      <p className="text-sm text-gray-600 text-center">
-        JPG、PNG、GIF形式の画像をアップロードできます
-      </p>
-      
+
+
       {tempImageUrl && (
         <ImageCropModal
           imageUrl={tempImageUrl}
@@ -194,7 +164,7 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
             setTempImageUrl(null);
           }}
           onCropComplete={handleCropComplete}
-          aspectRatio={2/3} // 本の表紙の一般的なアスペクト比
+          aspectRatio={2 / 3} // 本の表紙の一般的なアスペクト比
         />
       )}
     </div>

@@ -9,7 +9,7 @@ export const BookDetail = ({ book, onClose }: BookDetailProps) => {
   if (!book) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
         <div className="flex justify-between items-start mb-4">
           <h2 className="text-2xl font-bold">{book.title}</h2>
@@ -23,13 +23,13 @@ export const BookDetail = ({ book, onClose }: BookDetailProps) => {
             </svg>
           </button>
         </div>
-        
+
         <div className="space-y-3">
           <div>
             <span className="text-gray-600 font-medium">著者:</span>
             <span className="ml-2">{book.author}</span>
           </div>
-          
+
           <div>
             <span className="text-gray-600 font-medium">タイプ:</span>
             <span className="ml-2">
@@ -39,25 +39,25 @@ export const BookDetail = ({ book, onClose }: BookDetailProps) => {
               {book.bookType === 'manga' && '漫画'}
             </span>
           </div>
-          
+
           <div>
             <span className="text-gray-600 font-medium">サイズ:</span>
             <span className="ml-2">
               {book.dimensions.width} × {book.dimensions.height} × {book.dimensions.depth} mm
             </span>
           </div>
-          
+
           {book.color && (
             <div>
               <span className="text-gray-600 font-medium">カラー:</span>
-              <span 
+              <span
                 className="ml-2 inline-block w-6 h-6 rounded border border-gray-300 align-middle"
                 style={{ backgroundColor: book.color }}
               />
             </div>
           )}
         </div>
-        
+
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}

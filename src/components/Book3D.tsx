@@ -32,17 +32,46 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
   
   // テクスチャを読み込む（textureUrlがある場合のみ）
   const texture = useMemo(() => {
-    if (!textureUrl) return null;
-    try {
-      const loader = new TextureLoader();
-      const loadedTexture = loader.load(textureUrl);
-      loadedTexture.colorSpace = SRGBColorSpace;
-      return loadedTexture;
-    } catch (error) {
-      console.error('Failed to load texture:', error);
+    if (!textureUrl) {
+      console.log(`[Book3D] ${book.title}: No texture URL provided`);
       return null;
     }
-  }, [textureUrl]);
+    
+    console.log(`[Book3D] ${book.title}: Loading texture from ${textureUrl}`);
+    
+    try {
+      const loader = new TextureLoader();
+      const loadedTexture = loader.load(
+        textureUrl,
+        // onLoad callback
+        (texture) => {
+          console.log(`[Book3D] ${book.title}: Texture loaded successfully`, {
+            image: texture.image,
+            width: texture.image?.width,
+            height: texture.image?.height,
+            format: texture.format,
+            colorSpace: texture.colorSpace
+          });
+        },
+        // onProgress callback
+        (progress) => {
+          console.log(`[Book3D] ${book.title}: Loading progress`, progress);
+        },
+        // onError callback
+        (error) => {
+          console.error(`[Book3D] ${book.title}: Failed to load texture`, error);
+        }
+      );
+      
+      loadedTexture.colorSpace = SRGBColorSpace;
+      console.log(`[Book3D] ${book.title}: Texture created, colorSpace set to ${loadedTexture.colorSpace}`);
+      
+      return loadedTexture;
+    } catch (error) {
+      console.error(`[Book3D] ${book.title}: Exception while creating texture:`, error);
+      return null;
+    }
+  }, [textureUrl, book.title]);
   
   // ドラッグ機能の実装
   const bind = useDrag(({ active, movement: [x, y] }) => {
@@ -70,11 +99,20 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
   );
   
   // テクスチャがある場合とない場合でマテリアルを切り替え
+  console.log(`[Book3D] ${book.title}: Rendering with texture:`, !!texture);
+  
   const bookMaterial = texture ? (
     <meshStandardMaterial 
       map={texture}
       roughness={0.8}
       metalness={0.1}
+      onUpdate={(material) => {
+        console.log(`[Book3D] ${book.title}: Material updated with texture`, {
+          map: material.map,
+          mapIsTexture: material.map?.isTexture,
+          needsUpdate: material.needsUpdate
+        });
+      }}
     />
   ) : (
     <meshStandardMaterial 

@@ -18,8 +18,9 @@ export function ImageEditor({ imageUrl, onSave, onCancel, aspectRatio = 1.5 }: I
   const [contrast, setContrast] = useState(100);
   const imageRef = useRef<HTMLImageElement | null>(null);
 
-  // キャンバスのサイズ
-  const canvasWidth = 400;
+  // キャンバスのサイズ（レスポンシブ対応）
+  const maxCanvasWidth = 500;
+  const canvasWidth = Math.min(maxCanvasWidth, window.innerWidth - 100);
   const canvasHeight = canvasWidth * aspectRatio;
 
   // 画像を描画
@@ -37,7 +38,7 @@ export function ImageEditor({ imageUrl, onSave, onCancel, aspectRatio = 1.5 }: I
     // 画像のアスペクト比を維持しながらスケーリング
     const imgAspect = img.width / img.height;
     const canvasAspect = canvasWidth / canvasHeight;
-    
+
     let drawWidth, drawHeight;
     if (imgAspect > canvasAspect) {
       // 画像が横長
@@ -55,7 +56,7 @@ export function ImageEditor({ imageUrl, onSave, onCancel, aspectRatio = 1.5 }: I
 
     // フィルターを適用
     ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
-    
+
     // 画像を描画
     ctx.drawImage(img, x, y, drawWidth, drawHeight);
   }, [scale, offsetX, offsetY, brightness, contrast, canvasWidth, canvasHeight]);
@@ -70,9 +71,25 @@ export function ImageEditor({ imageUrl, onSave, onCancel, aspectRatio = 1.5 }: I
 
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    
+
     img.onload = () => {
       imageRef.current = img;
+
+      // 画像がキャンバスに収まるように初期スケールを計算
+      const imgAspect = img.width / img.height;
+      const canvasAspect = canvasWidth / canvasHeight;
+
+      let initialScale = 1;
+      if (imgAspect > canvasAspect) {
+        // 画像が横長の場合、幅に合わせる
+        initialScale = canvasWidth / img.width;
+      } else {
+        // 画像が縦長の場合、高さに合わせる
+        initialScale = canvasHeight / img.height;
+      }
+
+      // 少し余白を持たせる
+      setScale(initialScale * 0.9);
       drawImage();
     };
 
@@ -95,7 +112,7 @@ export function ImageEditor({ imageUrl, onSave, onCancel, aspectRatio = 1.5 }: I
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDragging) return;
-    
+
     setOffsetX(e.clientX - dragStart.x);
     setOffsetY(e.clientY - dragStart.y);
   };
@@ -124,15 +141,20 @@ export function ImageEditor({ imageUrl, onSave, onCancel, aspectRatio = 1.5 }: I
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
-      <h3 className="text-lg font-semibold mb-4">画像を編集</h3>
-      
-      <div className="mb-4 border-2 border-gray-300 rounded-lg overflow-hidden">
+    <div className="w-full">
+      <div className="mb-6 border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center p-4">
         <canvas
           ref={canvasRef}
           width={canvasWidth}
           height={canvasHeight}
-          className="cursor-move w-full"
+          className="cursor-move"
+          style={{
+            display: 'block',
+            backgroundColor: 'white',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            maxWidth: '100%',
+            height: 'auto'
+          }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}

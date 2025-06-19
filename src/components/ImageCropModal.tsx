@@ -25,14 +25,14 @@ export function ImageCropModal({
   const onImageLoad = useCallback(() => {
     const defaultCrop: Crop = {
       unit: '%',
-      width: 80,
-      height: 80,
-      x: 10,
-      y: 10
+      width: 90,
+      height: 90,
+      x: 5,
+      y: 5
     };
 
     if (aspectRatio) {
-      const cropWidth = 80;
+      const cropWidth = 90;
       const cropHeight = cropWidth / aspectRatio;
       defaultCrop.height = cropHeight;
       defaultCrop.y = (100 - cropHeight) / 2;
@@ -95,28 +95,29 @@ export function ImageCropModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
-        <div className="p-6 border-b">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[60]">
+      <div className="bg-white rounded-lg shadow-2xl max-w-5xl w-full mx-4 max-h-[95vh] overflow-hidden relative">
+        <div className="p-6 border-b bg-gray-50">
           <h2 className="text-2xl font-bold text-gray-800">画像をトリミング</h2>
-          <p className="text-gray-600 mt-1">ドラッグして画像の表示範囲を調整してください</p>
         </div>
 
-        <div className="p-6 overflow-auto max-h-[60vh]">
-          <ReactCrop
-            crop={crop}
-            onChange={(_, percentCrop) => setCrop(percentCrop)}
-            onComplete={(c) => setCompletedCrop(c)}
-            aspect={aspectRatio}
-          >
-            <img
-              ref={imageRef}
-              src={imageUrl}
-              alt="Upload"
-              onLoad={onImageLoad}
-              className="max-w-full h-auto"
-            />
-          </ReactCrop>
+        <div className="p-8 bg-gray-100 overflow-auto max-h-[70vh] flex items-center justify-center">
+          <div className="bg-white p-4 rounded-lg shadow-lg">
+            <ReactCrop
+              crop={crop}
+              onChange={(_, percentCrop) => setCrop(percentCrop)}
+              onComplete={(c) => setCompletedCrop(c)}
+              aspect={aspectRatio}
+            >
+              <img
+                ref={imageRef}
+                src={imageUrl}
+                alt="Upload"
+                onLoad={onImageLoad}
+                className="max-w-full h-auto"
+              />
+            </ReactCrop>
+          </div>
         </div>
 
         <div className="p-6 border-t flex justify-end gap-4">
