@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { useBookStore } from '@/stores';
 import { saveImage } from '@/utils/db/imageOperations';
+import { ImageCropModal } from './ImageCropModal';
 
 interface ImageUploadProps {
   bookId: string;
@@ -19,6 +20,8 @@ const SAMPLE_IMAGES = [
 export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+  const [showCropModal, setShowCropModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { updateBook } = useBookStore();
 
@@ -40,25 +43,8 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
       
       reader.onload = async (e) => {
         const imageDataUrl = e.target?.result as string;
-        setPreview(imageDataUrl);
-        
-        try {
-          // IndexedDBに画像を保存
-          await saveImage(bookId, imageDataUrl, file.type);
-          
-          // 本のテクスチャURLとcoverImageDataを更新
-          await updateBook(bookId, { 
-            textureUrl: imageDataUrl,
-            coverImageData: imageDataUrl 
-          });
-          
-          // コールバックを実行
-          onUploadComplete?.(imageDataUrl);
-        } catch (error) {
-          console.error('画像の保存に失敗しました:', error);
-          alert('画像の保存に失敗しました');
-        }
-        
+        setTempImageUrl(imageDataUrl);
+        setShowCropModal(true);
         setIsUploading(false);
       };
 
@@ -72,7 +58,7 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
       console.error('画像のアップロードに失敗しました:', error);
       setIsUploading(false);
     }
-  }, [bookId, updateBook, onUploadComplete]);
+  }, []);
 
   const handleButtonClick = () => {
     fileInputRef.current?.click();
@@ -90,21 +76,41 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
   };
 
   // サンプル画像を選択
-  const handleSampleImageSelect = async (imageUrl: string) => {
-    setPreview(imageUrl);
+  const handleSampleImageSelect = (imageUrl: string) => {
+    setTempImageUrl(imageUrl);
+    setShowCropModal(true);
+  };
+
+  // トリミング完了時の処理
+  const handleCropComplete = async (croppedImageUrl: string) => {
+    setPreview(croppedImageUrl);
     
     try {
-      // サンプル画像もIndexedDBに保存（MIME typeは画像URLから推測）
-      const mimeType = imageUrl.endsWith('.png') ? 'image/png' : 'image/jpeg';
-      await saveImage(bookId, imageUrl, mimeType);
+      // クロップした画像をBase64に変換
+      const response = await fetch(croppedImageUrl);
+      const blob = await response.blob();
+      const reader = new FileReader();
       
-      await updateBook(bookId, { 
-        textureUrl: imageUrl,
-        coverImageData: imageUrl 
-      });
-      onUploadComplete?.(imageUrl);
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        
+        // IndexedDBに画像を保存
+        await saveImage(bookId, base64, blob.type);
+        
+        // 本のテクスチャURLとcoverImageDataを更新
+        await updateBook(bookId, { 
+          textureUrl: base64,
+          coverImageData: base64 
+        });
+        
+        // コールバックを実行
+        onUploadComplete?.(base64);
+      };
+      
+      reader.readAsDataURL(blob);
     } catch (error) {
-      console.error('サンプル画像の保存に失敗しました:', error);
+      console.error('画像の保存に失敗しました:', error);
+      alert('画像の保存に失敗しました');
     }
   };
 
@@ -162,8 +168,11 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
                   alt={`サンプル ${index + 1}`}
                   className="w-full h-20 object-cover rounded border-2 border-transparent group-hover:border-blue-500 transition-colors"
                   onError={(e) => {
-                    // 画像が見つからない場合はプレースホルダーを表示
-                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/150x200?text=Sample+${index + 1}`;
+                    // 画像が見つからない場合は親要素を非表示にする
+                    const button = (e.target as HTMLImageElement).closest('button');
+                    if (button) {
+                      button.style.display = 'none';
+                    }
                   }}
                 />
               </button>
@@ -175,6 +184,19 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
       <p className="text-sm text-gray-600 text-center">
         JPG、PNG、GIF形式の画像をアップロードできます
       </p>
+      
+      {tempImageUrl && (
+        <ImageCropModal
+          imageUrl={tempImageUrl}
+          isOpen={showCropModal}
+          onClose={() => {
+            setShowCropModal(false);
+            setTempImageUrl(null);
+          }}
+          onCropComplete={handleCropComplete}
+          aspectRatio={2/3} // 本の表紙の一般的なアスペクト比
+        />
+      )}
     </div>
   );
 }

@@ -23,7 +23,7 @@ export async function initDB(): Promise<IDBPDatabase<BookStackDBSchema>> {
   }
 
   dbInstance = await openDB<BookStackDBSchema>(DB_NAME, DB_VERSION, {
-    upgrade(db) {
+    upgrade(db: IDBPDatabase<BookStackDBSchema>) {
       // Create books store
       if (!db.objectStoreNames.contains(STORES.BOOKS)) {
         const bookStore = db.createObjectStore(STORES.BOOKS, { keyPath: 'id' });

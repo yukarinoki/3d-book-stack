@@ -54,7 +54,7 @@ export type BookStore = BookStackState & BookStackActions;
 const initialState: BookStackState = {
   books: [],
   selectedBookIds: [],
-  viewMode: 'stack',
+  viewMode: 'grid',
   physicsEnabled: false,
   hoveredBookId: null,
 };

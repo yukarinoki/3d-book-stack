@@ -67,7 +67,7 @@ export async function searchBooks(query: string): Promise<DBBook[]> {
   const allBooks = await db.getAll(STORES.BOOKS);
   
   const lowercaseQuery = query.toLowerCase();
-  return allBooks.filter(book => 
+  return allBooks.filter((book: DBBook) => 
     book.title.toLowerCase().includes(lowercaseQuery) ||
     book.author.toLowerCase().includes(lowercaseQuery)
   );

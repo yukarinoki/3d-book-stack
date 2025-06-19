@@ -20,7 +20,7 @@ export default function App() {
   const [showTextureUpload, setShowTextureUpload] = useState(false);
   const [detailBook, setDetailBook] = useState<string | null>(null);
 
-  useControls({
+  useControls('設定', {
     viewMode: {
       label: '表示モード',
       value: viewMode,
@@ -38,10 +38,17 @@ export default function App() {
     },
     '画像機能': button(() => { }),
     uploadTexture: button(() => {
+      console.log('=== uploadTexture button clicked ===');
+
       // useBookStore.getState()で最新の状態を直接取得
       const currentState = useBookStore.getState();
       const currentSelectedIds = currentState.selectedBookIds;
       const currentBooks = currentState.books;
+
+      console.log('Current selectedBookIds:', currentSelectedIds);
+      console.log('Number of selected books:', currentSelectedIds.length);
+      console.log('Total books in store:', currentBooks.length);
+
       const currentSelectedBook = currentSelectedIds.length === 1
         ? currentBooks.find(b => b.id === currentSelectedIds[0])
         : null;
@@ -49,14 +56,21 @@ export default function App() {
       console.log('Current selected book:', currentSelectedBook);
 
       if (currentSelectedIds.length === 1) {
+        console.log('Condition: 1 book selected - opening modal');
+        console.log('Setting showTextureUpload to true');
         setShowTextureUpload(true);
+        console.log('showTextureUpload should now be true');
       } else if (currentSelectedIds.length === 0) {
+        console.log('Condition: No books selected - showing alert');
         alert('本を選択してください');
       } else {
+        console.log('Condition: Multiple books selected - showing alert');
         alert('1冊のみ選択してください');
       }
+
+      console.log('=== uploadTexture button handler finished ===');
     })
-  });
+  }, { collapsed: false });
 
   // 選択された本の情報をLevaに表示
   useControls('選択中の本', () => {
@@ -111,6 +125,15 @@ export default function App() {
   const selectedBookForTexture = selectedBookIds.length === 1
     ? books.find(book => book.id === selectedBookIds[0])
     : null;
+
+  // デバッグ: モーダル表示条件の確認
+  useEffect(() => {
+    console.log('=== Modal display conditions ===');
+    console.log('showTextureUpload:', showTextureUpload);
+    console.log('selectedBookForTexture:', selectedBookForTexture);
+    console.log('Modal should display:', showTextureUpload && selectedBookForTexture);
+    console.log('================================');
+  }, [showTextureUpload, selectedBookForTexture]);
 
   // 詳細表示用の本を取得
   const selectedBookForDetail = detailBook ? books.find(b => b.id === detailBook) : null;

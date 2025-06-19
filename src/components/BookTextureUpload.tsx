@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ImageUpload } from './ImageUpload';
 import { ImageEditor } from './ImageEditor';
 import { useBookStore } from '@/stores';
@@ -13,6 +13,19 @@ export function BookTextureUpload({ book, onClose }: BookTextureUploadProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
   const { updateBook } = useBookStore();
+
+  // デバッグ: コンポーネントのマウント確認
+  useEffect(() => {
+    console.log('=== BookTextureUpload mounted ===');
+    console.log('Book prop:', book);
+    console.log('Book ID:', book.id);
+    console.log('Book title:', book.title);
+    console.log('================================');
+
+    return () => {
+      console.log('=== BookTextureUpload unmounted ===');
+    };
+  }, [book]);
 
   // 画像アップロード完了時の処理
   const handleUploadComplete = useCallback((imageUrl: string) => {
@@ -63,17 +76,17 @@ export function BookTextureUpload({ book, onClose }: BookTextureUploadProps) {
 
           {!isEditing ? (
             <div>
-              <ImageUpload 
-                bookId={book.id} 
+              <ImageUpload
+                bookId={book.id}
                 onUploadComplete={handleUploadComplete}
               />
-              
+
               {book.textureUrl && (
                 <div className="mt-4">
                   <h3 className="font-semibold text-sm mb-2">現在の表紙画像</h3>
-                  <img 
-                    src={book.textureUrl} 
-                    alt="現在の表紙" 
+                  <img
+                    src={book.textureUrl}
+                    alt="現在の表紙"
                     className="w-32 h-48 object-cover rounded-lg shadow-md mx-auto"
                   />
                 </div>

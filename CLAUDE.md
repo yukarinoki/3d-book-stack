@@ -1,6 +1,7 @@
 # CLAUDE.md
 
 必ず日本語で回答すること
+実装が終わったらnpm run buildを必ずしてエラーが出ないことを確認すること。
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 

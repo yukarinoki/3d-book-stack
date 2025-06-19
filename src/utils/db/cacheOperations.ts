@@ -69,7 +69,7 @@ export async function getCacheSize(): Promise<{ books: number; images: number; t
     }
   });
   
-  allImages.forEach(image => {
+  allImages.forEach((image: DBImage) => {
     totalSize += image.imageData.length + JSON.stringify(image).length;
   });
   

@@ -17,9 +17,11 @@
     "@react-three/fiber": "^9.1.2",
     "@react-three/rapier": "^2.1.0",
     "@use-gesture/react": "^10.3.1",
+    "idb": "^8.0.3",
     "leva": "^0.10.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-image-crop": "^11.0.10",
     "three": "^0.177.0",
     "zustand": "^5.0.5"
   },
