@@ -22,7 +22,8 @@
       "WebFetch(domain:github.com)",
       "Bash(npm install:*)",
       "Bash(rg:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(pkill:*)"
     ],
     "deny": []
   },

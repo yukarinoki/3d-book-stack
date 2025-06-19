@@ -23,6 +23,11 @@ export function ImageUpload({ bookId, face = 'front', onUploadComplete }: ImageU
   // 現在の本を取得
   const book = books.find(b => b.id === bookId);
   
+  // Debug: refが設定されているか確認
+  useEffect(() => {
+    console.log('ImageUpload mounted, fileInputRef:', fileInputRef.current);
+  }, []);
+  
   // 各面に応じたアスペクト比を計算
   const getAspectRatioForFace = () => {
     if (!book) return 1.5; // デフォルト値
@@ -67,6 +72,7 @@ export function ImageUpload({ bookId, face = 'front', onUploadComplete }: ImageU
   }, [book, face]);
 
   const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File select event triggered!', event.target.files);
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -102,7 +108,14 @@ export function ImageUpload({ bookId, face = 'front', onUploadComplete }: ImageU
   }, []);
 
   const handleButtonClick = () => {
-    fileInputRef.current?.click();
+    console.log('Button clicked!', fileInputRef.current);
+    if (!fileInputRef.current) {
+      console.error('File input ref is null!');
+      return;
+    }
+    console.log('Attempting to click file input...');
+    fileInputRef.current.click();
+    console.log('File input click called');
   };
 
   const handleRemoveImage = async () => {
@@ -201,8 +214,11 @@ export function ImageUpload({ bookId, face = 'front', onUploadComplete }: ImageU
         <div className="flex items-center gap-2">
           <button
             onClick={handleButtonClick}
+            onMouseDown={(e) => console.log('Mouse down event:', e)}
             disabled={isUploading}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer relative z-10"
+            style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+            type="button"
           >
             {isUploading ? 'アップロード中...' : '画像を選択'}
           </button>
