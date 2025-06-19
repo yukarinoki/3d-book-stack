@@ -35,9 +35,13 @@ export interface Book {
   finishDate?: string | null; // 終読日 (ISO 8601形式)
 }
 
+export type ViewMode = 'stack' | 'shelf' | 'grid' | 'timeline';
+export type TimelinePeriod = 'week' | 'month' | 'year';
+
 export interface BookStackState {
   books: Book[];
   selectedBookIds: string[];
-  viewMode: 'stack' | 'shelf' | 'grid';
+  viewMode: ViewMode;
   physicsEnabled: boolean;
+  timelinePeriod: TimelinePeriod;
 }

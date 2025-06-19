@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Leva, useControls, button } from 'leva';
-import { Scene3D, Book3D, Floor, BookTextureUpload, BookDetail, SelectionControls, TextureViewModal, BookShelfSupport, KeyboardHelp } from '@/components';
+import { Scene3D, Book3D, Floor, BookTextureUpload, BookDetail, SelectionControls, TextureViewModal, BookShelfSupport, KeyboardHelp, TimelineLabel } from '@/components';
 import { useBookStore } from '@/stores';
 import { positionBooksForMode } from '@/utils';
 import { useKeyboardControls } from '@/hooks';
@@ -14,7 +14,9 @@ export const Book3DView = () => {
     setViewMode,
     initializeBooks,
     selectedBookIds,
-    clearSelection
+    clearSelection,
+    timelinePeriod,
+    setTimelinePeriod
   } = useBookStore();
 
   const [showTextureUpload, setShowTextureUpload] = useState(false);
@@ -39,7 +41,8 @@ export const Book3DView = () => {
       options: {
         'スタック': 'stack',
         '表紙並べ': 'grid',
-        '本棚': 'shelf'
+        '本棚': 'shelf',
+        '時系列': 'timeline'
       },
       onChange: setViewMode
     },
@@ -103,6 +106,21 @@ export const Book3DView = () => {
     })
   }, { collapsed: false });
 
+  // 時系列モードの期間選択
+  useControls('時系列設定', () => ({
+    period: {
+      label: '期間',
+      value: timelinePeriod,
+      options: {
+        '週': 'week',
+        '月': 'month',
+        '年': 'year'
+      },
+      onChange: setTimelinePeriod,
+      render: (get) => get('設定.viewMode') === 'timeline'
+    }
+  }), { collapsed: viewMode !== 'timeline' }, [viewMode, timelinePeriod]);
+
   // 選択された本の情報をLevaに表示
   useControls('選択中の本', () => {
     const selectedBook = selectedBookIds.length > 0
@@ -142,8 +160,8 @@ export const Book3DView = () => {
 
   // 表示モードに応じて本の位置を計算
   const positionedBooks = useMemo(() => {
-    return positionBooksForMode(books, viewMode);
-  }, [books, viewMode]);
+    return positionBooksForMode(books, viewMode, timelinePeriod);
+  }, [books, viewMode, timelinePeriod]);
 
   // 初回マウント時に本を初期化
   useEffect(() => {
@@ -222,6 +240,19 @@ export const Book3DView = () => {
               />
             </>
           )}
+
+          {/* 時系列モードの時はラベルを表示 */}
+          {viewMode === 'timeline' && (() => {
+            const labels = new Map<string, [number, number, number]>();
+            positionedBooks.forEach(book => {
+              if (book.groupLabel && !labels.has(book.groupLabel)) {
+                labels.set(book.groupLabel, book.position);
+              }
+            });
+            return Array.from(labels.entries()).map(([label, position]) => (
+              <TimelineLabel key={label} label={label} position={position} />
+            ));
+          })()}
         </Scene3D>
       </div>
 

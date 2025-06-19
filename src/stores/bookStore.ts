@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import type { Book } from '@/types';
+import type { Book, ViewMode, TimelinePeriod } from '@/types';
 import { createMockBooks } from '@/utils';
 import { 
   syncBookToIndexedDB, 
@@ -12,9 +12,10 @@ import {
 export interface BookStackState {
   books: Book[];
   selectedBookIds: string[];
-  viewMode: 'stack' | 'shelf' | 'grid';
+  viewMode: ViewMode;
   physicsEnabled: boolean;
   hoveredBookId: string | null;
+  timelinePeriod: TimelinePeriod;
 }
 
 export interface BookStackActions {
@@ -35,7 +36,8 @@ export interface BookStackActions {
   setHoveredBook: (id: string | null) => void;
   
   // 表示モードの管理
-  setViewMode: (mode: BookStackState['viewMode']) => void;
+  setViewMode: (mode: ViewMode) => void;
+  setTimelinePeriod: (period: TimelinePeriod) => void;
   
   // 物理演算の管理
   setPhysicsEnabled: (enabled: boolean) => void;
@@ -57,6 +59,7 @@ const initialState: BookStackState = {
   viewMode: 'grid',
   physicsEnabled: false,
   hoveredBookId: null,
+  timelinePeriod: 'week',
 };
 
 export const useBookStore = create<BookStore>()(
@@ -186,6 +189,10 @@ export const useBookStore = create<BookStore>()(
         // 表示モードの管理
         setViewMode: (mode) => {
           set({ viewMode: mode }, false, 'setViewMode');
+        },
+        
+        setTimelinePeriod: (period) => {
+          set({ timelinePeriod: period }, false, 'setTimelinePeriod');
         },
         
         // 物理演算の管理

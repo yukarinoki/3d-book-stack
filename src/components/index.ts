@@ -12,3 +12,4 @@ export { BookDataTable } from './BookDataTable';
 export { Book3DView } from './Book3DView';
 export { BookShelfSupport } from './BookShelfSupport';
 export { KeyboardHelp } from './KeyboardHelp';
+export { TimelineLabel } from './TimelineLabel';
