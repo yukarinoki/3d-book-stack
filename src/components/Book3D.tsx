@@ -70,9 +70,26 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
       // テクスチャのラッピングモードを設定（エッジの問題を解決）
       loadedTexture.wrapS = THREE.ClampToEdgeWrapping;
       loadedTexture.wrapT = THREE.ClampToEdgeWrapping;
-      // ベストな比率を設定した、変更禁止
-      loadedTexture.repeat.set(0.82, 0.88);
-      loadedTexture.offset.set(0.09, 0.065);
+
+      // 各面に応じたrepeatとoffset設定
+      switch (faceName) {
+        case 'front':
+        case 'back':
+          // 表紙・裏表紙用の設定
+          loadedTexture.repeat.set(0.82, 0.88);
+          loadedTexture.offset.set(0.09, 0.065);
+          break;
+        case 'spine':
+          // 背表紙用の設定（細長い面なので調整）
+          loadedTexture.repeat.set(0.95, 0.9);
+          loadedTexture.offset.set(0.025, 0.05);
+          break;
+        case 'topBottom':
+          // 天地用の設定（横長の面なので調整）
+          loadedTexture.repeat.set(0.95, 0.9);
+          loadedTexture.offset.set(0.025, 0.05);
+          break;
+      }
 
       // テクスチャのフィルタリングを設定（滑らかな表示）
       loadedTexture.minFilter = THREE.LinearMipmapLinearFilter;
@@ -141,7 +158,7 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
         roughness={0.8}
         metalness={0.1}
       />
-      
+
       {/* 1: 左面（-X） - 背表紙 */}
       {spineTexture ? (
         <meshStandardMaterial
@@ -160,7 +177,7 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
           emissiveIntensity={isSelected ? 0.2 : 0}
         />
       )}
-      
+
       {/* 2: 上面（+Y） - 天 */}
       {topBottomTexture ? (
         <meshStandardMaterial
@@ -179,7 +196,7 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
           emissiveIntensity={isSelected ? 0.2 : 0}
         />
       )}
-      
+
       {/* 3: 下面（-Y） - 地 */}
       {topBottomTexture ? (
         <meshStandardMaterial
@@ -198,7 +215,7 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
           emissiveIntensity={isSelected ? 0.2 : 0}
         />
       )}
-      
+
       {/* 4: 前面（+Z） - 表紙 */}
       {frontTexture ? (
         <meshStandardMaterial
@@ -217,7 +234,7 @@ export const Book3D = ({ book, physicsEnabled = true, onDoubleClick }: Book3DPro
           emissiveIntensity={isSelected ? 0.2 : 0}
         />
       )}
-      
+
       {/* 5: 後面（-Z） - 裏表紙 */}
       {backTexture ? (
         <meshStandardMaterial

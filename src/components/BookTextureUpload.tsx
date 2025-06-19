@@ -60,11 +60,14 @@ export function BookTextureUpload({ book, onClose }: BookTextureUploadProps) {
     switch (activeTab) {
       case 'front':
       case 'back':
+        // 表紙・裏表紙: 縦長 (高さ÷幅)
         return book.dimensions.height / book.dimensions.width;
       case 'spine':
+        // 背表紙: 高さ÷厚み（縦長）
         return book.dimensions.height / book.dimensions.depth;
       case 'topBottom':
-        return book.dimensions.depth / book.dimensions.width;
+        // 天地: 横長 (幅÷厚み)
+        return book.dimensions.width / book.dimensions.depth;
       default:
         return 1;
     }

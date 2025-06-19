@@ -23,6 +23,26 @@ export function ImageUpload({ bookId, face = 'front', onUploadComplete }: ImageU
   // 現在の本を取得
   const book = books.find(b => b.id === bookId);
   
+  // 各面に応じたアスペクト比を計算
+  const getAspectRatioForFace = () => {
+    if (!book) return 1.5; // デフォルト値
+    
+    switch (face) {
+      case 'front':
+      case 'back':
+        // 表紙・裏表紙: 高さ÷幅
+        return book.dimensions.height / book.dimensions.width;
+      case 'spine':
+        // 背表紙: 高さ÷厚み（縦長）
+        return book.dimensions.height / book.dimensions.depth;
+      case 'topBottom':
+        // 天地: 幅÷厚み（横長）
+        return book.dimensions.width / book.dimensions.depth;
+      default:
+        return 1.5;
+    }
+  };
+  
   // 現在の面の画像を取得してプレビューに設定
   useEffect(() => {
     if (!book) return;
@@ -208,7 +228,7 @@ export function ImageUpload({ bookId, face = 'front', onUploadComplete }: ImageU
             setTempImageUrl(null);
           }}
           onCropComplete={handleCropComplete}
-          aspectRatio={2 / 3} // 本の表紙の一般的なアスペクト比
+          aspectRatio={getAspectRatioForFace()}
         />
       )}
     </div>
