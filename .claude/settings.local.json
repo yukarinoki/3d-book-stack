@@ -19,7 +19,9 @@
       "Bash(git commit:*)",
       "WebFetch(domain:threejs.org)",
       "Bash(open test-uv.html)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(npm install:*)",
+      "Bash(rg:*)"
     ],
     "deny": []
   },

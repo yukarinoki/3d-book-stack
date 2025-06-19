@@ -6,6 +6,15 @@ export interface BookDimensions {
 
 export type BookType = 'paperback' | 'hardcover' | 'softcover' | 'manga';
 
+export interface BookTextures {
+  front?: string;      // 表紙
+  back?: string;       // 裏表紙
+  spine?: string;      // 背表紙
+  top?: string;        // 天
+  bottom?: string;     // 地
+  foreEdge?: string;   // 小口
+}
+
 export interface Book {
   id: string;
   title: string;
@@ -13,14 +22,15 @@ export interface Book {
   dimensions: BookDimensions;
   bookType: BookType;
   color?: string;
-  textureUrl?: string; // 表紙のテクスチャ
+  textureUrl?: string; // 表紙のテクスチャ（後方互換性のため残す）
   coverImageData?: string; // 表紙のプレビュー画像
-  spineTextureUrl?: string; // 背表紙のテクスチャ
-  backCoverTextureUrl?: string; // 裏表紙のテクスチャ
-  topBottomTextureUrl?: string; // 天地共通のテクスチャ
+  spineTextureUrl?: string; // 背表紙のテクスチャ（後方互換性のため残す）
+  backCoverTextureUrl?: string; // 裏表紙のテクスチャ（後方互換性のため残す）
+  topBottomTextureUrl?: string; // 天地共通のテクスチャ（後方互換性のため残す）
   edgeColor?: string; // 小口の色（デフォルト: クリーム色）
   position?: [number, number, number];
   rotation?: [number, number, number];
+  textures?: BookTextures; // 新しいテクスチャ管理方式
 }
 
 export interface BookStackState {

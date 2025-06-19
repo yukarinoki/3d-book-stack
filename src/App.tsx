@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Leva, useControls, button } from 'leva';
-import { Layout, Scene3D, Book3D, Floor, BookTextureUpload, BookDetail, SelectionControls } from '@/components';
+import { Layout, Scene3D, Book3D, Floor, BookTextureUpload, BookDetail, SelectionControls, TextureViewModal } from '@/components';
 import { useBookStore } from '@/stores';
 import { positionBooksForMode } from '@/utils';
 import './App.css';
@@ -18,6 +18,7 @@ export default function App() {
   } = useBookStore();
 
   const [showTextureUpload, setShowTextureUpload] = useState(false);
+  const [showTextureView, setShowTextureView] = useState(false);
   const [detailBook, setDetailBook] = useState<string | null>(null);
 
   // デバッグ: 状態の変化を監視
@@ -44,7 +45,26 @@ export default function App() {
       value: physicsEnabled,
       onChange: setPhysicsEnabled
     },
-    '画像機能': button(() => { }),
+    'テクスチャ確認': button(() => {
+      console.log('=== テクスチャ確認 button clicked ===');
+      
+      const currentState = useBookStore.getState();
+      const currentSelectedIds = currentState.selectedBookIds;
+      
+      console.log('Current selectedBookIds:', currentSelectedIds);
+      console.log('Number of selected books:', currentSelectedIds.length);
+      
+      if (currentSelectedIds.length === 1) {
+        console.log('Condition: 1 book selected - opening texture view modal');
+        setShowTextureView(true);
+      } else if (currentSelectedIds.length === 0) {
+        console.log('Condition: No books selected - showing alert');
+        alert('本を選択してください');
+      } else {
+        console.log('Condition: Multiple books selected - showing alert');
+        alert('1冊のみ選択してください');
+      }
+    }),
     uploadTexture: button(() => {
       console.log('=== uploadTexture button clicked ===');
 
@@ -182,8 +202,10 @@ export default function App() {
       {(() => {
         console.log('=== Rendering modal check ===');
         console.log('showTextureUpload:', showTextureUpload);
+        console.log('showTextureView:', showTextureView);
         console.log('selectedBookForTexture:', selectedBookForTexture);
-        console.log('Should render modal:', showTextureUpload && selectedBookForTexture);
+        console.log('Should render upload modal:', showTextureUpload && selectedBookForTexture);
+        console.log('Should render view modal:', showTextureView && selectedBookForTexture);
 
         if (showTextureUpload && selectedBookForTexture) {
           console.log('Rendering BookTextureUpload component');
@@ -197,7 +219,22 @@ export default function App() {
             />
           );
         }
-        console.log('NOT rendering BookTextureUpload component');
+        
+        if (showTextureView && selectedBookForTexture) {
+          console.log('Rendering TextureViewModal component');
+          console.log('Book data:', selectedBookForTexture);
+          return (
+            <TextureViewModal
+              book={selectedBookForTexture}
+              onClose={() => {
+                console.log('TextureViewModal onClose called');
+                setShowTextureView(false);
+              }}
+            />
+          );
+        }
+        
+        console.log('NOT rendering any modal component');
         return null;
       })()}
 
