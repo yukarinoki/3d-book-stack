@@ -13,5 +13,5 @@ export { Book3DView } from './Book3DView';
 export { BookShelfSupport } from './BookShelfSupport';
 export { KeyboardHelp } from './KeyboardHelp';
 export { TimelineLabel } from './TimelineLabel';
-export { InteractiveBook3D } from './InteractiveBook3D';
 export { PhysicsInteractionControls } from './PhysicsInteractionControls';
+export { InteractiveBook3D } from './InteractiveBook3D';

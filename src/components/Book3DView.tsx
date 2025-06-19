@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Leva, useControls, button } from 'leva';
-import { Scene3D, InteractiveBook3D, Floor, BookTextureUpload, BookDetail, SelectionControls, TextureViewModal, BookShelfSupport, KeyboardHelp, TimelineLabel, PhysicsInteractionControls } from '@/components';
+import { Scene3D, Book3D, InteractiveBook3D, Floor, BookTextureUpload, BookDetail, SelectionControls, TextureViewModal, BookShelfSupport, KeyboardHelp, TimelineLabel, PhysicsInteractionControls } from '@/components';
 import { useBookStore } from '@/stores';
 import { positionBooksForMode } from '@/utils';
 import { useKeyboardControls } from '@/hooks';
@@ -214,12 +214,21 @@ export const Book3DView = () => {
         <Scene3D physicsEnabled={physicsEnabled && viewMode !== 'single'}>
           <Floor />
           {positionedBooks.map((book) => (
-            <InteractiveBook3D
-              key={book.id}
-              book={book}
-              physicsEnabled={physicsEnabled && viewMode !== 'single'}
-              onDoubleClick={() => setDetailBook(book.id)}
-            />
+            physicsEnabled && viewMode !== 'single' ? (
+              <InteractiveBook3D
+                key={book.id}
+                book={book}
+                physicsEnabled={true}
+                onDoubleClick={() => setDetailBook(book.id)}
+              />
+            ) : (
+              <Book3D
+                key={book.id}
+                book={book}
+                physicsEnabled={false}
+                onDoubleClick={() => setDetailBook(book.id)}
+              />
+            )
           ))}
           
           {/* 本棚モードの時は両端に支えを追加 */}

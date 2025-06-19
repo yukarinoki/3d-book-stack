@@ -5,6 +5,7 @@ import { Book3D } from './Book3D';
 import { usePhysicsInteraction } from '@/hooks/usePhysicsInteraction';
 import type { PositionedBook } from '@/utils/bookPositioning';
 import { useGesture } from '@use-gesture/react';
+import { useThree } from '@react-three/fiber';
 
 interface InteractiveBook3DProps {
   book: PositionedBook;
@@ -14,6 +15,7 @@ interface InteractiveBook3DProps {
 
 export const InteractiveBook3D = ({ book, physicsEnabled = true, onDoubleClick }: InteractiveBook3DProps) => {
   const rigidBodyRef = useRef<RapierRigidBody>(null);
+  const { camera } = useThree();
   const { 
     interactionMode, 
     startGrab, 
@@ -22,6 +24,7 @@ export const InteractiveBook3D = ({ book, physicsEnabled = true, onDoubleClick }
     applyFlick,
     isGrabbing,
     grabbedBookId,
+    updateGrabbedPosition,
   } = usePhysicsInteraction();
 
   // ジェスチャーバインディング
@@ -55,11 +58,16 @@ export const InteractiveBook3D = ({ book, physicsEnabled = true, onDoubleClick }
         applyImpulse(rigidBodyRef.current, { x: x * 50, y: y * 50 });
       }
     },
-    onDrag: ({ velocity, event }) => {
+    onDrag: ({ velocity, movement, event }) => {
       if (!physicsEnabled || !rigidBodyRef.current) return;
       event.stopPropagation();
       
-      if (interactionMode === 'flick' && velocity[0] ** 2 + velocity[1] ** 2 > 0.5) {
+      if (interactionMode === 'grab' && isGrabbing && grabbedBookId === book.id) {
+        // カメラからの距離を計算
+        const position = rigidBodyRef.current.translation();
+        const distance = camera.position.distanceTo({ x: position.x, y: position.y, z: position.z } as any);
+        updateGrabbedPosition({ x: movement[0], y: movement[1] }, distance);
+      } else if (interactionMode === 'flick' && velocity[0] ** 2 + velocity[1] ** 2 > 0.5) {
         applyFlick(rigidBodyRef.current, { x: velocity[0], y: velocity[1] });
       }
     },

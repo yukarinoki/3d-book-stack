@@ -1,21 +1,10 @@
 import { useState, useCallback, useRef } from 'react';
-import { useThree } from '@react-three/fiber';
-import { useGesture } from '@use-gesture/react';
 import { Vector3 } from 'three';
 import type { RapierRigidBody } from '@react-three/rapier';
 
 export type InteractionMode = 'push' | 'grab' | 'flick';
 
-interface GestureState {
-  movement: [number, number];
-  velocity: [number, number];
-  direction: [number, number];
-  distance: [number, number];
-  down: boolean;
-}
-
 export const usePhysicsInteraction = () => {
-  const { camera } = useThree();
   const [isGrabbing, setIsGrabbing] = useState(false);
   const [grabbedBookId, setGrabbedBookId] = useState<string | null>(null);
   const [interactionMode, setInteractionMode] = useState<InteractionMode>('push');
@@ -40,12 +29,10 @@ export const usePhysicsInteraction = () => {
     initialPositionRef.current = null;
   }, []);
 
-  // つかんだ本の位置を更新
-  const updateGrabbedPosition = useCallback((movement: { x: number; y: number }) => {
+  // つかんだ本の位置を更新（カメラの情報は使う時に渡す）
+  const updateGrabbedPosition = useCallback((movement: { x: number; y: number }, cameraDistance: number) => {
     if (!grabbedBodyRef.current || !initialPositionRef.current) return;
     
-    // カメラからの距離に基づいて移動量を調整
-    const cameraDistance = camera.position.distanceTo(initialPositionRef.current);
     const factor = cameraDistance * 0.001;
     
     const newPosition = {
@@ -55,7 +42,7 @@ export const usePhysicsInteraction = () => {
     };
     
     grabbedBodyRef.current.setTranslation(newPosition, true);
-  }, [camera]);
+  }, []);
 
   // プッシュモードで力を加える
   const applyImpulse = useCallback((rigidBody: RapierRigidBody, movement: { x: number; y: number }) => {
@@ -88,26 +75,6 @@ export const usePhysicsInteraction = () => {
     rigidBody.applyImpulse(torque, true);
   }, []);
 
-  // ジェスチャーのバインド
-  const bind = useGesture({
-    onDrag: ({ movement }: GestureState) => {
-      if (interactionMode === 'grab' && isGrabbing) {
-        updateGrabbedPosition({ x: movement[0], y: movement[1] });
-      }
-    },
-    onDragEnd: () => {
-      if (interactionMode === 'grab' && isGrabbing) {
-        endGrab();
-      }
-    },
-  });
-  
-  // bindが関数を返すことを保証
-  const bindProps = useCallback(() => {
-    const props = bind();
-    return props || {};
-  }, [bind]);
-
   return {
     isGrabbing,
     grabbedBookId,
@@ -119,6 +86,5 @@ export const usePhysicsInteraction = () => {
     applyFlick,
     handlePinch,
     updateGrabbedPosition,
-    bind: bindProps,
   };
 };
