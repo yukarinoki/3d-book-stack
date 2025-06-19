@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Leva, useControls, button } from 'leva';
-import { Scene3D, Book3D, Floor, BookTextureUpload, BookDetail, SelectionControls, TextureViewModal, BookShelfSupport, KeyboardHelp, TimelineLabel } from '@/components';
+import { Scene3D, InteractiveBook3D, Floor, BookTextureUpload, BookDetail, SelectionControls, TextureViewModal, BookShelfSupport, KeyboardHelp, TimelineLabel, PhysicsInteractionControls } from '@/components';
 import { useBookStore } from '@/stores';
 import { positionBooksForMode } from '@/utils';
 import { useKeyboardControls } from '@/hooks';
@@ -214,7 +214,7 @@ export const Book3DView = () => {
         <Scene3D physicsEnabled={physicsEnabled && viewMode !== 'single'}>
           <Floor />
           {positionedBooks.map((book) => (
-            <Book3D
+            <InteractiveBook3D
               key={book.id}
               book={book}
               physicsEnabled={physicsEnabled && viewMode !== 'single'}
@@ -303,6 +303,7 @@ export const Book3DView = () => {
 
       <SelectionControls />
       <KeyboardHelp />
+      {physicsEnabled && viewMode !== 'single' && <PhysicsInteractionControls />}
       <BookDetail
         book={selectedBookForDetail || null}
         onClose={() => setDetailBook(null)}
