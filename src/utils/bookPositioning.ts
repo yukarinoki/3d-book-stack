@@ -1,4 +1,4 @@
-import type { Book, ViewMode, TimelinePeriod } from '@/types';
+import type { Book, ViewMode, TimelinePeriod, BookRating } from '@/types';
 
 export interface PositionedBook extends Book {
   position: [number, number, number];
@@ -20,6 +20,8 @@ export const positionBooksForMode = (
       return positionBooksInGrid(books);
     case 'timeline':
       return positionBooksByTimeline(books, timelinePeriod || 'week');
+    case 'rating':
+      return positionBooksByRating(books);
     default:
       return positionBooksInStack(books);
   }
@@ -186,6 +188,62 @@ export const positionBooksByTimeline = (
         position: [currentX, yPosition, 0] as [number, number, number],
         rotation: [-Math.PI / 2, 0, 0] as [number, number, number], // 表紙が上向き
         groupLabel: label,
+      });
+    });
+
+    currentX += stackSpacing;
+  });
+
+  return positionedBooks;
+};
+
+// 評価別表示モード
+export const positionBooksByRating = (books: Book[]): PositionedBook[] => {
+  // 評価の順序を定義
+  const ratingOrder: (BookRating | 'unrated')[] = ['bad', 'good', 'very good', 'unrated'];
+  
+  // 評価ごとのラベル
+  const ratingLabels: Record<BookRating | 'unrated', string> = {
+    'bad': '😞 Bad',
+    'good': '👍 Good',
+    'very good': '🌟 Very Good',
+    'unrated': '📚 未評価'
+  };
+
+  // 本を評価ごとにグループ化
+  const bookGroups = new Map<BookRating | 'unrated', Book[]>();
+  
+  // 各評価グループを初期化
+  ratingOrder.forEach(rating => {
+    bookGroups.set(rating, []);
+  });
+
+  // 本を評価ごとに分類
+  books.forEach(book => {
+    const rating = book.rating || 'unrated';
+    bookGroups.get(rating)!.push(book);
+  });
+
+  // 本を配置
+  const positionedBooks: PositionedBook[] = [];
+  const stackSpacing = 0.5; // スタック間の間隔
+  let currentX = -(ratingOrder.length - 1) * stackSpacing / 2;
+
+  ratingOrder.forEach(rating => {
+    const groupBooks = bookGroups.get(rating)!;
+    let currentHeight = 0;
+    const bookSpacing = 0.05; // 本同士の間隔
+
+    groupBooks.forEach((book) => {
+      const bookHeight = book.dimensions.depth / 1000;
+      const yPosition = currentHeight + bookHeight / 2;
+      currentHeight += bookHeight + bookSpacing;
+
+      positionedBooks.push({
+        ...book,
+        position: [currentX, yPosition, 0] as [number, number, number],
+        rotation: [-Math.PI / 2, 0, 0] as [number, number, number], // 表紙が上向き
+        groupLabel: ratingLabels[rating],
       });
     });
 

@@ -10,6 +10,7 @@ export const mockBooks: Book[] = [
     color: '#FF6B6B',
     purchaseDate: '2024-01-15',
     finishDate: '2024-01-20',
+    rating: 'very good',
   },
   {
     id: '2',
@@ -20,6 +21,7 @@ export const mockBooks: Book[] = [
     color: '#4ECDC4',
     purchaseDate: '2024-01-10',
     finishDate: '2024-01-25',
+    rating: 'very good',
   },
   {
     id: '3',
@@ -30,6 +32,7 @@ export const mockBooks: Book[] = [
     color: '#FFD93D',
     purchaseDate: '2024-02-01',
     finishDate: '2024-02-15',
+    rating: 'good',
   },
   {
     id: '4',
@@ -40,6 +43,7 @@ export const mockBooks: Book[] = [
     color: '#6BCF7F',
     purchaseDate: '2024-02-20',
     finishDate: '2024-03-10',
+    rating: 'good',
   },
   {
     id: '5',
@@ -50,6 +54,7 @@ export const mockBooks: Book[] = [
     color: '#E67E22',
     purchaseDate: '2024-03-01',
     finishDate: '2024-03-05',
+    rating: 'bad',
   },
   {
     id: '6',
@@ -60,6 +65,7 @@ export const mockBooks: Book[] = [
     color: '#9B59B6',
     purchaseDate: '2024-03-15',
     finishDate: '2024-03-20',
+    rating: 'good',
   },
   {
     id: '7',
@@ -70,6 +76,7 @@ export const mockBooks: Book[] = [
     color: '#3498DB',
     purchaseDate: '2024-03-25',
     finishDate: '2024-04-05',
+    rating: 'very good',
   },
   {
     id: '8',
@@ -80,6 +87,7 @@ export const mockBooks: Book[] = [
     color: '#F39C12',
     purchaseDate: '2024-04-01',
     finishDate: '2024-04-10',
+    rating: 'good',
   },
   {
     id: '9',
@@ -110,6 +118,7 @@ export const mockBooks: Book[] = [
     color: '#1ABC9C',
     purchaseDate: '2024-05-01',
     finishDate: '2024-05-05',
+    rating: 'very good',
   },
   {
     id: '12',
@@ -130,6 +139,7 @@ export const mockBooks: Book[] = [
     color: '#C0392B',
     purchaseDate: '2024-05-20',
     finishDate: '2024-05-22',
+    rating: 'good',
   },
   {
     id: '14',

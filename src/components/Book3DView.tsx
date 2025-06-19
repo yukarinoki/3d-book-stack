@@ -42,7 +42,8 @@ export const Book3DView = () => {
         'スタック': 'stack',
         '表紙並べ': 'grid',
         '本棚': 'shelf',
-        '時系列': 'timeline'
+        '時系列': 'timeline',
+        '評価別': 'rating'
       },
       onChange: setViewMode
     },
@@ -241,8 +242,8 @@ export const Book3DView = () => {
             </>
           )}
 
-          {/* 時系列モードの時はラベルを表示 */}
-          {viewMode === 'timeline' && (() => {
+          {/* 時系列モードまたは評価別モードの時はラベルを表示 */}
+          {(viewMode === 'timeline' || viewMode === 'rating') && (() => {
             const labels = new Map<string, [number, number, number]>();
             positionedBooks.forEach(book => {
               if (book.groupLabel && !labels.has(book.groupLabel)) {

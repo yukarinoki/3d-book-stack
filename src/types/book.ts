@@ -33,10 +33,12 @@ export interface Book {
   textures?: BookTextures; // 新しいテクスチャ管理方式
   purchaseDate?: string | null; // 購入日 (ISO 8601形式)
   finishDate?: string | null; // 終読日 (ISO 8601形式)
+  rating?: BookRating; // 評価
 }
 
-export type ViewMode = 'stack' | 'shelf' | 'grid' | 'timeline';
+export type ViewMode = 'stack' | 'shelf' | 'grid' | 'timeline' | 'rating';
 export type TimelinePeriod = 'week' | 'month' | 'year';
+export type BookRating = 'bad' | 'good' | 'very good';
 
 export interface BookStackState {
   books: Book[];
