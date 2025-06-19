@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BookDetail } from '../BookDetail';
@@ -11,13 +11,9 @@ describe('BookDetail', () => {
     author: 'テスト著者',
     dimensions: { width: 105, height: 148, depth: 15 },
     bookType: 'paperback',
-    publisher: 'テスト出版社',
-    pageCount: 200,
     purchaseDate: '2024-01-01',
     finishDate: '2024-01-15',
     rating: 'good',
-    category: 'フィクション',
-    comment: 'とても面白い本でした',
   };
 
   const mockOnClose = vi.fn();

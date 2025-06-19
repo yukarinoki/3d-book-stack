@@ -15,15 +15,17 @@ describe('Floor', () => {
     expect(typeof Floor).toBe('function');
   });
 
-  it('should accept physicsEnabled prop', () => {
-    const floorWithPhysics = Floor({ physicsEnabled: true });
-    const floorWithoutPhysics = Floor({ physicsEnabled: false });
+  it('should accept size and position props', () => {
+    const floorWithSize = Floor({ size: 30 });
+    const floorWithPosition = Floor({ position: [0, -1, 0] });
+    const floorWithBoth = Floor({ size: 40, position: [0, -2, 0] });
     
-    expect(floorWithPhysics).toBeDefined();
-    expect(floorWithoutPhysics).toBeDefined();
+    expect(floorWithSize).toBeDefined();
+    expect(floorWithPosition).toBeDefined();
+    expect(floorWithBoth).toBeDefined();
   });
 
-  it('should have default physicsEnabled value of true', () => {
+  it('should have default size and position values', () => {
     const defaultFloor = Floor({});
     expect(defaultFloor).toBeDefined();
   });

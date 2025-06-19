@@ -133,20 +133,24 @@ describe('usePhysicsInteraction', () => {
     });
     
     const movement = { x: 50, y: -30 };
+    const cameraDistance = 10;
     act(() => {
-      result.current.updateGrabbedPosition(movement);
+      result.current.updateGrabbedPosition(movement, cameraDistance);
     });
     
     expect(mockRigidBody.setTranslation).toHaveBeenCalled();
   });
 
-  it('should return gesture bind props', () => {
+  it('should not update position when no book is grabbed', () => {
     const { result } = renderHook(() => usePhysicsInteraction());
-    const bindProps = result.current.bind();
     
-    expect(bindProps).toHaveProperty('onPointerDown');
-    expect(bindProps).toHaveProperty('onPointerMove');
-    expect(bindProps).toHaveProperty('onPointerUp');
+    const movement = { x: 50, y: -30 };
+    const cameraDistance = 10;
+    act(() => {
+      result.current.updateGrabbedPosition(movement, cameraDistance);
+    });
+    
+    expect(mockRigidBody.setTranslation).not.toHaveBeenCalled();
   });
 
   it('should handle multi-touch gestures', () => {

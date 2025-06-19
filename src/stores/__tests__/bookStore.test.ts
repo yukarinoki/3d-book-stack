@@ -80,7 +80,7 @@ describe('bookStore', () => {
       };
 
       await useBookStore.getState().addBook(book);
-      await useBookStore.getState().deleteBook('test-1');
+      await useBookStore.getState().deleteBooks(['test-1']);
       
       const { books } = useBookStore.getState();
       expect(books).toHaveLength(0);
@@ -269,7 +269,11 @@ describe('bookStore', () => {
       useBookStore.getState().selectBook('test-1');
       useBookStore.getState().toggleBookSelection('test-2');
       
-      await useBookStore.getState().updateSelectedBooksColor('#FF0000');
+      // Update color for selected books individually
+      const selectedIds = useBookStore.getState().selectedBookIds;
+      for (const id of selectedIds) {
+        await useBookStore.getState().updateBook(id, { color: '#FF0000' });
+      }
       
       const { books } = useBookStore.getState();
       expect(books[0].color).toBe('#FF0000');
