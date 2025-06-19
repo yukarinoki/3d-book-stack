@@ -2,6 +2,8 @@
 
 必ず日本語で回答すること
 実装が終わったらnpm run buildを必ずしてエラーが出ないことを確認すること。
+言われたことだけをしろ、コードを勝手に書き換えるな。
+デバッグ出力を勝手に消すな
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 

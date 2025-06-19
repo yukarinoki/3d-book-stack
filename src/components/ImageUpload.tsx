@@ -8,15 +8,6 @@ interface ImageUploadProps {
   onUploadComplete?: (imageUrl: string) => void;
 }
 
-// デモ用のサンプル画像URL（publicディレクトリ内の画像）
-const SAMPLE_IMAGES = [
-  '/test_images/book_cover_1.jpg',
-  '/test_images/book_cover_2.jpg',
-  '/test_images/book_cover_3.jpg',
-  '/test_images/book_cover_4.jpg',
-  '/test_images/book_cover_5.jpg',
-];
-
 export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
@@ -73,12 +64,6 @@ export function ImageUpload({ bookId, onUploadComplete }: ImageUploadProps) {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  };
-
-  // サンプル画像を選択
-  const handleSampleImageSelect = (imageUrl: string) => {
-    setTempImageUrl(imageUrl);
-    setShowCropModal(true);
   };
 
   // トリミング完了時の処理
